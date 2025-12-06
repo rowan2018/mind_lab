@@ -1,0 +1,10 @@
+{
+"appTitle": "마음쉼표",
+"homeDailyTitle": "오늘의 멘탈 케어 🌿",
+"homeTestTitle": "심리 테스트 모음 📝",
+"btnGo": "GO",
+"btnShare": "결과 공유하기",
+"btnRetry": "다른 테스트 하기",
+"loading": "로딩 중...",
+"errorLoad": "데이터를 가져오지 못했습니다."
+}

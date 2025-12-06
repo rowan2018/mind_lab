@@ -1,0 +1,10 @@
+{
+"appTitle": "マインドコンマ",
+"homeDailyTitle": "今日のメンタルケア 🌿",
+"homeTestTitle": "心理テストコレクション 📝",
+"btnGo": "開始",
+"btnShare": "結果をシェア",
+"btnRetry": "他のテストをする",
+"loading": "読み込み中...",
+"errorLoad": "データの読み込みに失敗しました。"
+}

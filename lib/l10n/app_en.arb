@@ -1,0 +1,10 @@
+{
+"appTitle": "Rowan Mind",
+"homeDailyTitle": "Daily Mental Care 🌿",
+"homeTestTitle": "Psychology Tests 📝",
+"btnGo": "START",
+"btnShare": "Share Result",
+"btnRetry": "Try Another",
+"loading": "Loading...",
+"errorLoad": "Failed to load data."
+}
