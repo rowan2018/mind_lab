@@ -1,10 +1,36 @@
 {
-"appTitle": "Rowan Mind",
-"homeDailyTitle": "Daily Mental Care 🌿",
-"homeTestTitle": "Psychology Tests 📝",
-"btnGo": "START",
-"btnShare": "Share Result",
-"btnRetry": "Try Another",
-"loading": "Loading...",
-"errorLoad": "Failed to load data."
+  "appTitle": "Rowan Mind",
+  "homeDailyTitle": "Daily Mental Care 🌿",
+  "homeTestTitle": "Psychology Tests 📝",
+  "btnGo": "START",
+  "btnShare": "Share Result",
+  "btnRetry": "Try Another",
+  "loading": "Loading...",
+  "errorLoad": "Failed to load data.",
+
+  "secretTitle": "Mysterious Mirror Lab",
+  "secretDesc": "Whisper to the Genie",
+  "btnEnter": "Enter",
+
+  "mirrorTitle": "Make a Wish",
+  "mirrorSnackTitle": "Genie",
+  "mirrorSnackMsg": "I haven't given you an answer yet.",
+  "mirrorLoading": "Gathering the energy\nof the universe...",
+  "mirrorGuide": "Tell me the story\nin your heart.",
+  "mirrorHint": "Peek into the future with {count} apples.",
+  "@mirrorHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "resultPageTitle": "Test Result",
+  "errorImage": "No Image",
+  "btnShareReward": "Share & Get 🍎",
+  "adTitle": "Need mysterious myrrh?",
+  "adDesc": "Watch ad to get Apple & Myrrh set",
+  "alertTitle": "Notice",
+  "adUpdateMsg": "Ad feature coming soon!"
 }

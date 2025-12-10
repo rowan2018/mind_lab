@@ -38,12 +38,13 @@ dependencies:
 #  google_mobile_ads: ^5.0.0
   flutter_screenutil: ^5.9.0  # 추가 (반응형 끝판왕)
   cupertino_icons: ^1.0.8
-  share_plus: ^10.0.0      # 공유 기능
+  share_plus: ^12.0.1     # 공유 기능
   screenshot: ^3.0.0       # 화면 캡쳐
   path_provider: ^2.1.2    # 파일 저장 경로
   google_mobile_ads: ^5.1.0
   animated_text_kit: ^4.2.2  # 타자 치는 효과
   lottie: ^3.1.0
+
 
 dev_dependencies:
   flutter_test:
@@ -55,6 +56,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  change_app_package_name: ^1.5.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -68,10 +70,17 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    # ✅ 각 경로는 하이픈(-)과 공백으로 시작해야 합니다.
+    - assets/
+    - assets/images/
+    - assets/font/
+  fonts:
+        - family: GowunBatang  # 코드에서 사용할 이름
+          fonts:
+            - asset: assets/font/GowunBatang-Regular.ttf # 파일명 정확히 일치시켜야 함
+            - asset: assets/font/GowunBatang-Bold.ttf
+              weight: 700
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

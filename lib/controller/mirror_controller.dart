@@ -1,31 +1,74 @@
+import 'dart:convert';
+import 'dart:io'; // 파일 저장용
+import 'dart:typed_data'; // 이미지 데이터 변환용
+import 'dart:ui' as ui; // 이미지 캡처용
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart'; // 캡처 경계 확인용
 import 'package:get/get.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart'; // 광고 패키지
-// import 'package:rowan_mind_lab/controller/ad_controller.dart'; // (나중에 광고 컨트롤러 연결)
-import 'dart:convert'; // jsonEncode 쓰려면 필요
-import 'package:http/http.dart' as http; // 통신 패키지
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart'; // 임시 폴더 경로용
+import 'package:share_plus/share_plus.dart'; // 공유하기용
 
 class MirrorController extends GetxController {
   final TextEditingController textController = TextEditingController();
 
-  // 🍎 황금 사과 개수 (기본 0개에서 시작)
+  // 📸 화면 캡처를 위한 키
+  final GlobalKey captureKey = GlobalKey();
+
+  // 🍎 황금 사과 개수 (기본 100개)
   var appleCount = 100.obs;
   var isLoading = false.obs;
   var answerText = "".obs;
 
-  // 💰 질문 1회당 비용 (사장님 기획: 7개)
+  // 💰 질문 1회당 비용
   final int costPerQuestion = 2;
 
-  // 🕵️ [핵심] 심사 통과용 스위치 (이것만 false로 두면 버튼 숨겨짐)
+  // 🕵️ 심사 통과용 스위치
   final bool isAdEnabled = false;
 
   @override
   void onInit() {
     super.onInit();
-    // (나중에 여기에 저장된 사과 개수 불러오는 로직 추가)
+    // 나중에 로컬 저장소에서 사과 개수 불러오는 로직 추가 가능
   }
 
-  // 질문하기
+  // 📸 [기능] 화면 캡처 및 공유하기
+  Future<void> captureAndShare() async {
+    try {
+      // 1. 캡처할 영역 가져오기
+      RenderRepaintBoundary? boundary = captureKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+
+      if (boundary == null) {
+        print("캡처 영역을 찾을 수 없습니다.");
+        return;
+      }
+
+      // 2. 고화질 이미지로 변환 (pixelRatio 3.0 추천)
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+
+      if (byteData == null) return;
+      Uint8List pngBytes = byteData.buffer.asUint8List();
+
+      // 3. 휴대폰 임시 폴더에 파일로 저장
+      final directory = await getTemporaryDirectory();
+      final File imgFile = File('${directory.path}/genie_mirror_result.png');
+      await imgFile.writeAsBytes(pngBytes);
+
+      // 4. 공유 창 띄우기
+      await Share.shareXFiles(
+        [XFile(imgFile.path)],
+        text: "[지니의 램프] 내 욕망을 꿰뚫어 본 지니의 답변...🔮\n#지니의램프 #팩폭 #소원",
+      );
+
+    } catch (e) {
+      print("캡처 에러 발생: $e");
+      Get.snackbar("오류", "이미지 공유 중 문제가 발생했습니다.", backgroundColor: Colors.white);
+    }
+  }
+
+  // 🔮 [기능] 거울에게 질문하기
   void askMirror() async {
     String question = textController.text.trim();
     if (question.isEmpty) return;
@@ -41,15 +84,13 @@ class MirrorController extends GetxController {
               onPressed: () => Get.back(),
               child: const Text("취소"),
             ),
-            // 심사 중엔 이 버튼이 아예 안 보이거나, 눌러도 반응 없게
             if (isAdEnabled)
               ElevatedButton(
                 onPressed: () {
                   Get.back();
-                  // TODO: 광고 보여주고 사과 충전하는 함수 연결
-                  // AdController.to.showRewardAd();
+                  // 광고 보기 로직 연결
                 },
-                child: const Text("광고 보고 충전 (+5개)"),
+                child: const Text("광고 보고 충전"),
               ),
           ],
         ),
@@ -57,15 +98,14 @@ class MirrorController extends GetxController {
       return;
     }
 
-    // 2. 정상 진행 (사과 차감)
+    // 2. 정상 진행
     appleCount.value -= costPerQuestion;
     isLoading.value = true;
     answerText.value = "";
-    FocusManager.instance.primaryFocus?.unfocus();
+    FocusManager.instance.primaryFocus?.unfocus(); // 키보드 내리기
 
     try {
-      // ⭐ [여기가 핵심] 진짜 서버로 요청 보내기
-      // 사장님 윈도우 서버 주소 + 포트 3000
+      // 서버 요청
       final url = Uri.parse('http://www.rowanzone.co.kr:3000/ask-mirror');
 
       final response = await http.post(
@@ -73,17 +113,25 @@ class MirrorController extends GetxController {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "question": question,
-          "lang": Get.locale?.languageCode ?? 'ko' // 현재 언어(ko/ja)도 같이 보냄
+          "lang": Get.locale?.languageCode ?? 'ko'
         }),
       );
 
+
       if (response.statusCode == 200) {
-        // 성공! 서버가 준 답변을 화면에 표시
         final data = jsonDecode(utf8.decode(response.bodyBytes));
-        answerText.value = data['answer'];
+        String rawAnswer = data['answer'];
+
+        // ✨ [핵심] 정규식으로 (A), (B), 1. 등을 강제로 삭제
+        // 1. 문장 맨 앞의 (A), A., 1. 같은 패턴 제거
+        // 2. 따옴표(") 제거
+        // 3. 앞뒤 공백 제거
+        answerText.value = rawAnswer
+            .replaceAll(RegExp(r'^[\(]?[A-Z0-9][\)\.]?\s*'), '')
+            .replaceAll('"', '')
+            .trim();
       } else {
         answerText.value = "거울의 마력이 부족하여 연결되지 않았습니다. (서버 에러)";
-        print("서버 에러: ${response.statusCode}");
       }
 
     } catch (e) {

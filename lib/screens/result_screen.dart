@@ -3,33 +3,31 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:screenshot/screenshot.dart';
-// 👇 절대 경로 import
 import 'package:rowan_mind_lab/controller/result_controller.dart';
-import 'package:rowan_mind_lab/l10n/app_localizations.dart';
+import 'package:rowan_mind_lab/l10n/app_localizations.dart'; // import 필수
 import 'package:rowan_mind_lab/controller/mirror_controller.dart';
 
 class ResultScreen extends GetView<ResultController> {
   const ResultScreen({super.key});
 
-  // ✨ 메인 화면과 통일된 감성 컬러 팔레트
-  static const Color bgBase = Color(0xFFFFFCFC);       // 배경
-  static const Color mainPoint = Color(0xFFFF9EAA);    // 메인 핑크
-  static const Color subPoint = Color(0xFFFFF0F1);     // 연한 핑크
-  static const Color textDark = Color(0xFF5D4037);     // 진한 브라운
-  static const Color borderLine = Color(0xFFFFCDD2);   // 테두리
+  static const Color bgBase = Color(0xFFFFFCFC);
+  static const Color mainPoint = Color(0xFFFF9EAA);
+  static const Color subPoint = Color(0xFFFFF0F1);
+  static const Color textDark = Color(0xFF5D4037);
+  static const Color borderLine = Color(0xFFFFCDD2);
 
   @override
   Widget build(BuildContext context) {
-    // 다국어 적용 (필요시 l10n.btnShare 등으로 교체)
-    // final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!; // l10n 생성
 
     return Scaffold(
       backgroundColor: bgBase,
       appBar: AppBar(
-        title: Text("테스트 결과", style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: textDark)),
+        title: Text(l10n.resultPageTitle, // "테스트 결과"
+            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: textDark)),
         backgroundColor: bgBase,
         centerTitle: true,
-        automaticallyImplyLeading: false, // 뒤로가기 숨김 (홈 버튼 유도)
+        automaticallyImplyLeading: false,
         elevation: 0,
       ),
       body: SafeArea(
@@ -37,14 +35,13 @@ class ResultScreen extends GetView<ResultController> {
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
           child: Column(
             children: [
-              // 📸 1. 캡쳐 영역 (결과 카드)
               Screenshot(
                 controller: controller.screenshotController,
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(24.r),
-                    border: Border.all(color: borderLine, width: 2), // 핑크 테두리
+                    border: Border.all(color: borderLine, width: 2),
                     boxShadow: [
                       BoxShadow(
                         color: mainPoint.withOpacity(0.15),
@@ -53,10 +50,9 @@ class ResultScreen extends GetView<ResultController> {
                       ),
                     ],
                   ),
-                  padding: EdgeInsets.all(24.w), // 내부 여백 넉넉하게
+                  padding: EdgeInsets.all(24.w),
                   child: Column(
                     children: [
-                      // 결과 제목
                       Text(
                         controller.result.resultTitle,
                         style: TextStyle(
@@ -68,28 +64,55 @@ class ResultScreen extends GetView<ResultController> {
                       ),
                       SizedBox(height: 24.h),
 
-                      // 결과 이미지
+                      // 이미지 영역
                       Container(
-                        width: 180.w,
-                        height: 180.w,
+                        width: 200.w,
+                        height: 200.w,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20.r),
-                          color: subPoint, // 이미지가 없을 때도 예쁜 핑크 배경
+                          borderRadius: BorderRadius.circular(24.r),
+                          color: subPoint,
+                          boxShadow: [
+                            BoxShadow(
+                              color: mainPoint.withOpacity(0.2),
+                              blurRadius: 12,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20.r),
+                          borderRadius: BorderRadius.circular(24.r),
                           child: CachedNetworkImage(
                             imageUrl: controller.result.imgUrl ?? "",
-                            placeholder: (context, url) => Center(child: CircularProgressIndicator(color: mainPoint)),
-                            errorWidget: (context, url, error) => Icon(Icons.image_not_supported_rounded, size: 50.sp, color: mainPoint.withOpacity(0.5)),
+                            placeholder: (context, url) => Container(
+                              alignment: Alignment.center,
+                              color: subPoint,
+                              child: SizedBox(
+                                width: 40.w,
+                                height: 40.w,
+                                child: const CircularProgressIndicator(
+                                    color: mainPoint,
+                                    strokeWidth: 3
+                                ),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: Colors.grey[100],
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.broken_image_rounded, size: 40.sp, color: Colors.grey[400]),
+                                  SizedBox(height: 8.h),
+                                  Text(l10n.errorImage, // "이미지 없음"
+                                      style: TextStyle(fontSize: 12.sp, color: Colors.grey)),
+                                ],
+                              ),
+                            ),
                             fit: BoxFit.cover,
                           ),
                         ),
                       ),
 
                       SizedBox(height: 24.h),
-
-                      // 결과 설명
                       Text(
                         controller.result.resultDesc,
                         style: TextStyle(
@@ -99,10 +122,7 @@ class ResultScreen extends GetView<ResultController> {
                         ),
                         textAlign: TextAlign.center,
                       ),
-
                       SizedBox(height: 20.h),
-
-                      // 하단 로고 (홍보용)
                       Text("- Rowan Mind Lab -", style: TextStyle(color: mainPoint, fontSize: 12.sp, fontWeight: FontWeight.bold)),
                     ],
                   ),
@@ -110,21 +130,17 @@ class ResultScreen extends GetView<ResultController> {
               ),
 
               SizedBox(height: 30.h),
-
-              // 🎁 2. 광고/보상 버튼 (사과 & 몰약 패키지)
-              // 나중에 심사 때는 이 위젯 전체를 if(false)로 감싸서 숨기면 됩니다.
-              _buildSecretGiftButton(),
+              _buildSecretGiftButton(l10n), // l10n 전달
 
               SizedBox(height: 20.h),
 
-              // 🔘 3. 하단 버튼 (공유 / 홈)
               Row(
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: controller.shareResultImage, // 공유하고 사과받기 연결됨
+                      onPressed: controller.shareResultImage,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFD54F), // 공유는 눈에 띄는 노란색 (카톡 느낌)
+                        backgroundColor: const Color(0xFFFFD54F),
                         foregroundColor: textDark,
                         padding: EdgeInsets.symmetric(vertical: 16.h),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
@@ -135,7 +151,8 @@ class ResultScreen extends GetView<ResultController> {
                         children: [
                           Icon(Icons.share_rounded, size: 20.sp),
                           SizedBox(width: 8.w),
-                          Text("공유하고 🍎받기", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                          Text(l10n.btnShareReward, // "공유하고 🍎받기"
+                              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
@@ -145,18 +162,18 @@ class ResultScreen extends GetView<ResultController> {
                     child: ElevatedButton(
                       onPressed: controller.goHome,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: mainPoint, // 홈 버튼은 메인 핑크
+                        backgroundColor: mainPoint,
                         foregroundColor: Colors.white,
                         padding: EdgeInsets.symmetric(vertical: 16.h),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
                         elevation: 0,
                       ),
-                      child: Text("다른 테스트 하기", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                      child: Text(l10n.btnRetry, // "다른 테스트 하기"
+                          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
               ),
-
               SizedBox(height: 20.h),
             ],
           ),
@@ -165,24 +182,17 @@ class ResultScreen extends GetView<ResultController> {
     );
   }
 
-  // 🍎 몰약 & 사과 패키지 버튼 (광고 보기 유도)
-  // 🍎 몰약 & 사과 패키지 버튼
-  Widget _buildSecretGiftButton() {
-    // 1. 거울 컨트롤러를 찾아서 스위치 상태를 확인합니다.
-    // (만약 메모리에 없으면 생성해서라도 확인)
+  Widget _buildSecretGiftButton(AppLocalizations l10n) {
     final mirrorController = Get.put(MirrorController());
 
-    // 2. 심사 중(false)이면 아예 빈 공간을 리턴 -> 화면에서 사라짐!
     if (!mirrorController.isAdEnabled) {
       return const SizedBox.shrink();
     }
 
-    // 3. 심사 통과 후(true)에는 버튼이 보임
     return GestureDetector(
       onTap: () {
-        // TODO: 광고 보여주기 연결
-        // AdController.to.showRewardAd();
-        Get.snackbar("알림", "곧 광고 기능이 업데이트됩니다!", backgroundColor: Colors.white);
+        // "알림", "곧 광고 기능이..."
+        Get.snackbar(l10n.alertTitle, l10n.adUpdateMsg, backgroundColor: Colors.white);
       },
       child: Container(
         width: double.infinity,
@@ -210,9 +220,11 @@ class ResultScreen extends GetView<ResultController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("신비한 몰약이 필요하신가요?", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: textDark)),
+                  Text(l10n.adTitle, // "신비한 몰약이..."
+                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: textDark)),
                   SizedBox(height: 2.h),
-                  Text("광고 보고 사과&몰약 세트 받기", style: TextStyle(fontSize: 12.sp, color: Colors.grey[600])),
+                  Text(l10n.adDesc, // "광고 보고..."
+                      style: TextStyle(fontSize: 12.sp, color: Colors.grey[600])),
                 ],
               ),
             ),

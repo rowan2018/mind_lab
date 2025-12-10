@@ -1,10 +1,29 @@
 {
-"appTitle": "마음쉼표",
-"homeDailyTitle": "오늘의 멘탈 케어 🌿",
-"homeTestTitle": "심리 테스트 모음 📝",
-"btnGo": "GO",
-"btnShare": "결과 공유하기",
-"btnRetry": "다른 테스트 하기",
-"loading": "로딩 중...",
-"errorLoad": "데이터를 가져오지 못했습니다."
+  "appTitle": "마음쉼표",
+  "homeDailyTitle": "오늘의 멘탈 케어 🌿",
+  "homeTestTitle": "심리 테스트 모음 📝",
+  "btnGo": "GO",
+  "btnShare": "결과 공유하기",
+  "btnRetry": "다른 테스트 하기",
+  "loading": "로딩 중...",
+  "errorLoad": "데이터를 가져오지 못했습니다.",
+
+  "secretTitle": "신비한 거울 상담소",
+  "secretDesc": "지니에게 속삭여보세요",
+  "btnEnter": "입장",
+
+  "mirrorTitle": "소원을 말해봐",
+  "mirrorSnackTitle": "지니",
+  "mirrorSnackMsg": "아직 들려준 답이 없다.",
+  "mirrorLoading": "우주의 기운을\n모으는 중...",
+  "mirrorGuide": "그대의 마음속\n이야기를 들려주게.",
+  "mirrorHint": "사과 {count}개로 미래를 엿보거라.",
+
+  "resultPageTitle": "테스트 결과",
+  "errorImage": "이미지 없음",
+  "btnShareReward": "공유하고 🍎받기",
+  "adTitle": "신비한 몰약이 필요하신가요?",
+  "adDesc": "광고 보고 사과&몰약 세트 받기",
+  "alertTitle": "알림",
+  "adUpdateMsg": "곧 광고 기능이 업데이트됩니다!"
 }

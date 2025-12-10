@@ -73,10 +73,14 @@ class TestPlayScreen extends GetView<TestPlayController> {
 
               // ✨ 2. 질문 텍스트 영역 (카드 형태)
               Expanded(
-                flex: 2,
+                flex: 1, // 👈 [수정] 2 -> 1로 변경 (공간을 덜 차지하게 해서 아래 내용 끌어올림)
                 child: Center(
                   child: Container(
-                    padding: EdgeInsets.all(24.w),
+                    // 박스 너비가 너무 좁아 보이지 않게 좌우 여백을 주면서 가로로 좀 넓힘 (선택사항)
+                    width: double.infinity,
+                    margin: EdgeInsets.symmetric(horizontal: 24.w), // 👈 [추천] 좌우에 약간 여백 줌
+
+                    padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 24.w),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(24.r),
@@ -94,7 +98,7 @@ class TestPlayScreen extends GetView<TestPlayController> {
                       style: TextStyle(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.bold,
-                        height: 1.5,
+                        height: 1.3, // 👈 줄 간격 살짝 좁힘
                         color: textDark,
                         fontFamily: 'Pretendard',
                       ),

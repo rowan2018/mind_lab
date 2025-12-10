@@ -1,10 +1,29 @@
 {
-"appTitle": "マインドコンマ",
-"homeDailyTitle": "今日のメンタルケア 🌿",
-"homeTestTitle": "心理テストコレクション 📝",
-"btnGo": "開始",
-"btnShare": "結果をシェア",
-"btnRetry": "他のテストをする",
-"loading": "読み込み中...",
-"errorLoad": "データの読み込みに失敗しました。"
+  "appTitle": "マインドコンマ",
+  "homeDailyTitle": "今日のメンタルケア 🌿",
+  "homeTestTitle": "心理テストコレクション 📝",
+  "btnGo": "開始",
+  "btnShare": "結果をシェア",
+  "btnRetry": "他のテストをする",
+  "loading": "読み込み中...",
+  "errorLoad": "データの読み込みに失敗しました。",
+
+  "secretTitle": "神秘の鏡相談所",
+  "secretDesc": "ジーニーに囁いてみて",
+  "btnEnter": "入場",
+
+  "mirrorTitle": "願いを言ってみて",
+  "mirrorSnackTitle": "ジーニー",
+  "mirrorSnackMsg": "まだ答えを出していません。",
+  "mirrorLoading": "宇宙の気を\n集めています...",
+  "mirrorGuide": "あなたの心の中の\n話を聞かせて。",
+  "mirrorHint": "リンゴ{count}個で未来を覗いてみて。",
+
+  "resultPageTitle": "テスト結果",
+  "errorImage": "画像なし",
+  "btnShareReward": "シェアして🍎GET",
+  "adTitle": "神秘の没薬が必要ですか？",
+  "adDesc": "広告を見てリンゴと没薬セットを獲得",
+  "alertTitle": "お知らせ",
+  "adUpdateMsg": "広告機能はまもなくアップデートされます！"
 }
