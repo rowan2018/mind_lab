@@ -4,10 +4,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:rowan_mind_lab/l10n/app_localizations.dart';
 import 'routers/routers.dart';
+import 'package:rowan_mind_lab/service/notification_service.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await MobileAds.instance.initialize();
+  await NotificationService().init();
+  await NotificationService().scheduleWeeklyNotification(true);
 
   runApp(const MyApp());
 }
@@ -23,7 +28,7 @@ class MyApp extends StatelessWidget {
       splitScreenMode: true,
       builder: (context, child) {
         return GetMaterialApp(
-          title: 'Rowan Mind Lab', // 앱 이름 변경
+          title: 'Rowan Mind',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             primarySwatch: Colors.teal,
@@ -32,29 +37,26 @@ class MyApp extends StatelessWidget {
             scaffoldBackgroundColor: Colors.white,
           ),
           localizationsDelegates: const [
-            AppLocalizations.delegate, // 우리가 만든 거
+            AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: const [
-            Locale('ko', ''), // 한국어
-            Locale('en', ''), // 영어
-            Locale('ja', ''), // 일본어
+            Locale('ko', ''),
+            Locale('en', ''),
+            Locale('ja', ''),
           ],
-
-          // 앱 시작 시, 핸드폰 언어가 지원 목록에 없으면 영어로 설정
           localeResolutionCallback: (locale, supportedLocales) {
             for (var supportedLocale in supportedLocales) {
               if (supportedLocale.languageCode == locale?.languageCode) {
                 return supportedLocale;
               }
             }
-            return const Locale('en', ''); // 기본값
+            return const Locale('en', '');
           },
-          // 여기가 핵심!
-          initialRoute: AppPages.INITIAL, // '/' 대신 상수로 사용
-          getPages: AppPages.routes,      // routers.dart에서 가져옴
+          initialRoute: AppPages.INITIAL,
+          getPages: AppPages.routes,
         );
       },
     );

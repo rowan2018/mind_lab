@@ -32,5 +32,17 @@
   "adTitle": "Need mysterious myrrh?",
   "adDesc": "Watch ad to get Apple & Myrrh set",
   "alertTitle": "Notice",
-  "adUpdateMsg": "Ad feature coming soon!"
+  "adUpdateMsg": "Ad feature coming soon!",
+  "settingsTitle": "Settings",
+  "settingsPushTitle": "Push Notifications",
+  "settingsPushDesc": "Receive weekly quotes every Monday",
+  "settingsVersion": "Current Version",
+  "settingsAlarmOn": "Notifications enabled 🔔",
+  "settingsAlarmOff": "Notifications disabled 🔕",
+  "errorTitle": "Error",
+  "errorLoadData": "Failed to load result data.",
+  "shareRewardTitle": "Share Reward",
+  "shareRewardMessage": "You shared with a friend and got 2 extra 🍎!",
+  "shareViralText": "This test gave me goosebumps! 😱 You should try it too! \n#PsychologyTest #RowanMindLab",
+  "shareErrorMessage": "Unable to share."
 }

@@ -5,6 +5,7 @@ import 'package:rowan_mind_lab/l10n/app_localizations.dart';
 import 'package:rowan_mind_lab/controller/home_controller.dart';
 import 'package:rowan_mind_lab/routers/routers.dart';
 import 'package:rowan_mind_lab/screens/mirror_screen.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class HomeScreen extends GetView<HomeController> {
   const HomeScreen({super.key});
@@ -37,8 +38,11 @@ class HomeScreen extends GetView<HomeController> {
         centerTitle: false,
         actions: [
           IconButton(
+            // 아이콘 클릭 시 설정창(바텀시트) 띄우기
             icon: Icon(Icons.settings_outlined, color: textDark.withOpacity(0.5), size: 24.sp),
-            onPressed: () {},
+            onPressed: () {
+              _showSettingBottomSheet(context);
+            },
           ),
           SizedBox(width: 10.w),
         ],
@@ -56,11 +60,19 @@ class HomeScreen extends GetView<HomeController> {
 
               // TODAY 섹션
               Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline, // 텍스트 라인 맞춤
+                textBaseline: TextBaseline.alphabetic,
                 children: [
                   Text("TODAY", style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: mainPoint)),
                   SizedBox(width: 8.w),
-                  Text(l10n.homeDailyTitle,
-                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: textDark),
+                  // 🔥 [수정 1] 텍스트가 길어지면 줄바꿈 되도록 Expanded 적용
+                  Expanded(
+                    child: Text(
+                      l10n.homeDailyTitle,
+                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: textDark),
+                      maxLines: 1, // 혹은 2줄 허용하려면 2로 변경
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
@@ -71,26 +83,42 @@ class HomeScreen extends GetView<HomeController> {
 
               // SECRET 섹션
               Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
                 children: [
                   Text("SECRET", style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: const Color(0xFF6A00FF))),
                   SizedBox(width: 8.w),
-                  Text(l10n.secretTitle, // "신비한 거울 상담소" -> 변수 교체
-                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: textDark),
+                  // 🔥 [수정 2] 가로 오버플로우 방지
+                  Expanded(
+                    child: Text(
+                      l10n.secretTitle,
+                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: textDark),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
               SizedBox(height: 16.h),
-              _buildMirrorCard(l10n), // l10n 전달
+              _buildMirrorCard(l10n),
 
               SizedBox(height: 30.h),
 
               // TEST 섹션
               Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
                 children: [
                   Text("TEST", style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: mainPoint)),
                   SizedBox(width: 8.w),
-                  Text(l10n.homeTestTitle,
-                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: textDark),
+                  // 🔥 [수정 3] 가로 오버플로우 방지
+                  Expanded(
+                    child: Text(
+                      l10n.homeTestTitle,
+                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: textDark),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
@@ -112,10 +140,10 @@ class HomeScreen extends GetView<HomeController> {
         );
       }),
       bottomNavigationBar: Container(
-        height: 60.h,
+        height: 40.h,
         color: Colors.white,
         alignment: Alignment.center,
-        child: Text("AdMob Banner Area", style: TextStyle(color: Colors.grey[300], fontSize: 12.sp)),
+        child: Text(" ", style: TextStyle(color: Colors.grey[300], fontSize: 12.sp)),
       ),
     );
   }
@@ -127,7 +155,7 @@ class HomeScreen extends GetView<HomeController> {
         Get.to(() => const MirrorScreen());
       },
       child: Container(
-        height: 110.h,
+        height: 120.h,
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [Color(0xFF2E1A47), Color(0xFF6A00FF)],
@@ -175,20 +203,26 @@ class HomeScreen extends GetView<HomeController> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          l10n.secretTitle, // "신비한 거울 상담소"
+                          l10n.secretTitle,
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
+                          // 🔥 [수정 4] 거울 카드 내부 텍스트 오버플로우 방지
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         SizedBox(height: 4.h),
                         Text(
-                          l10n.secretDesc, // "지니에게 속삭여보세요"
+                          l10n.secretDesc,
                           style: TextStyle(
                             fontSize: 13.sp,
                             color: Colors.white70,
                           ),
+                          // 🔥 [수정 5] 설명글 오버플로우 방지
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
@@ -209,7 +243,7 @@ class HomeScreen extends GetView<HomeController> {
                     child: Row(
                       children: [
                         Text(
-                          l10n.btnEnter, // "입장"
+                          l10n.btnEnter,
                           style: TextStyle(
                             color: const Color(0xFF2E1A47),
                             fontWeight: FontWeight.bold,
@@ -335,7 +369,7 @@ class HomeScreen extends GetView<HomeController> {
                       fontWeight: FontWeight.bold,
                       color: textDark,
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 6.h),
@@ -346,7 +380,7 @@ class HomeScreen extends GetView<HomeController> {
                       color: textDark.withOpacity(0.6),
                       height: 1.4,
                     ),
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
@@ -371,6 +405,106 @@ class HomeScreen extends GetView<HomeController> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showSettingBottomSheet(BuildContext context) {
+    // 1. 여기서 번역 객체 가져오기
+    final l10n = AppLocalizations.of(context)!;
+
+    Get.bottomSheet(
+      Container(
+        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 30.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 제목: 설정
+            Text(
+              l10n.settingsTitle,
+              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: textDark),
+            ),
+            SizedBox(height: 24.h),
+
+            // 알림 스위치
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 제목: 푸시 알림
+                    Text(
+                      l10n.settingsPushTitle,
+                      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: textDark),
+                    ),
+                    SizedBox(height: 4.h),
+                    // 설명: 매일 명언과...
+                    Text(
+                      l10n.settingsPushDesc,
+                      style: TextStyle(fontSize: 12.sp, color: textDark.withOpacity(0.5)),
+                    ),
+                  ],
+                ),
+                StatefulBuilder(
+                  builder: (context, setState) {
+                    bool isSwitched = true;
+                    return Switch(
+                      value: isSwitched,
+                      activeColor: mainPoint,
+                      onChanged: (value) async {
+                        setState(() {
+                          isSwitched = value;
+                        });
+
+                        if (value) {
+                          // 알림 켜짐 메시지
+                          Get.snackbar(l10n.settingsPushTitle, l10n.settingsAlarmOn,
+                              snackPosition: SnackPosition.BOTTOM, margin: EdgeInsets.all(20.w));
+                        } else {
+                          // 알림 꺼짐 메시지
+                          Get.snackbar(l10n.settingsPushTitle, l10n.settingsAlarmOff,
+                              snackPosition: SnackPosition.BOTTOM, margin: EdgeInsets.all(20.w));
+                        }
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: 30.h),
+
+            // 버전 정보
+            FutureBuilder<PackageInfo>(
+              future: PackageInfo.fromPlatform(), // 앱 정보 가져오기
+              builder: (context, snapshot) {
+                // 아직 로딩 중이거나 데이터 없으면 기본값 '...'
+                String version = snapshot.data?.version ?? '...';
+
+                return Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(16.w),
+                  decoration: BoxDecoration(
+                    color: bgBase,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Text(
+                    "${l10n.settingsVersion}: $version",
+                    style: TextStyle(color: textDark.withOpacity(0.6), fontSize: 13.sp),
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
     );
   }
 }

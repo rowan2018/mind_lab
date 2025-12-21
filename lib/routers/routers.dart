@@ -7,19 +7,29 @@ import 'package:rowan_mind_lab/screens/result_screen.dart';
 import 'package:rowan_mind_lab/bindings/home_binding.dart';
 import 'package:rowan_mind_lab/bindings/test_play_binding.dart';
 import 'package:rowan_mind_lab/bindings/result_binding.dart';
+import 'package:get/get.dart';
+// ▼▼▼ 이 줄을 꼭 추가해야 합니다! ▼▼▼
+import 'package:rowan_mind_lab/splash_screen.dart';
 
 class Routes {
   // 경로 이름 상수 관리 (오타 방지)
   static const HOME = '/';
   static const TEST = '/test';
   static const RESULT = '/result';
+  static const SPLASH = '/splash'; // 추가
+  static const HomeScreen = '/home';
 }
 
 class AppPages {
   // 초기 페이지 설정
-  static const INITIAL = Routes.HOME;
+  static const INITIAL = Routes.SPLASH;
 
   static final routes = [
+    // 스플래시 페이지 등록
+    GetPage(
+      name: Routes.SPLASH,
+      page: () => const SplashScreen(),
+    ),
     // 1. 메인 화면
     GetPage(
       name: Routes.HOME,

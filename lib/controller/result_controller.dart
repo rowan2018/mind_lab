@@ -2,90 +2,115 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:rowan_mind_lab/l10n/app_localizations.dart';// [필수] 다국어 임포트
 
-// 👇 절대 경로 import
 import 'package:rowan_mind_lab/data/models.dart';
-import 'package:rowan_mind_lab/controller/mirror_controller.dart'; // 사과 창고 연결
+import 'package:rowan_mind_lab/routers/routers.dart';
+import 'package:rowan_mind_lab/controller/home_controller.dart';
 
 class ResultController extends GetxController {
-  late TestResult result;
-
-  // 📸 화면 캡쳐를 위한 컨트롤러 (ResultScreen에서 씀)
   final ScreenshotController screenshotController = ScreenshotController();
 
-  // 🚫 중복 보상 방지용 (한 번 받으면 true로 바뀜)
-  var hasReceivedReward = false;
+  late TestResult result;
+
+  bool hasResultRewardGiven = false;
+  bool hasShareRewardGiven = false;
 
   @override
   void onInit() {
     super.onInit();
-    if (Get.arguments != null) {
+
+    // [중요] 다국어 객체 가져오기 (Context가 유효할 때)
+    final loc = AppLocalizations.of(Get.context!)!;
+
+    if (Get.arguments != null && Get.arguments is TestResult) {
       result = Get.arguments as TestResult;
     } else {
-      Get.offAllNamed('/');
-      // Get.snackbar("오류", "데이터 없음"); // (필요 시 주석 해제)
+      // [수정] 한글 하드코딩 제거 -> loc 변수 사용
+      result = TestResult(
+        minScore: 0,
+        maxScore: 0,
+        resultTitleKo: loc.errorTitle, // "결과 오류" 대체
+        resultTitleEn: "Error",        // 영어는 그대로 둠
+        resultTitleJp: "エラー",         // 일본어는 그대로 둠
+        resultDescKo: loc.errorLoadData, // "데이터 못 불러옴" 대체
+        resultDescEn: "Failed to load result.",
+        resultDescJp: "結果を読み込めませんでした。",
+        imgUrl: "",
+      );
+    }
+
+    // 결과 화면 진입 보상
+    _giveResultReward();
+  }
+
+  // 🎁 1. 결과 확인 보상
+  void _giveResultReward() {
+    if (hasResultRewardGiven) return;
+
+    if (Get.isRegistered<HomeController>()) {
+      final homeController = Get.find<HomeController>();
+      homeController.addApple(2);
+      hasResultRewardGiven = true;
     }
   }
 
-  // 홈으로 가기
-  void goHome() {
-    Get.offAllNamed('/');
-  }
+  // 🎁 2. 공유 보상
+  void _giveShareReward() {
+    if (hasShareRewardGiven) return;
 
-  // ⭐ 이미지 캡쳐 후 공유 (+ 보상 지급)
-  Future<void> shareResultImage() async {
-    try {
-      // 1. 화면 캡쳐
-      final Uint8List? imageBytes = await screenshotController.capture();
+    // [중요] 다국어 객체 가져오기
+    final loc = AppLocalizations.of(Get.context!)!;
 
-      if (imageBytes != null) {
-        // 2. 파일로 저장
-        final directory = await getTemporaryDirectory();
-        final imagePath = File('${directory.path}/result_image.png');
-        await imagePath.writeAsBytes(imageBytes);
+    if (Get.isRegistered<HomeController>()) {
+      final homeController = Get.find<HomeController>();
+      homeController.addApple(2);
+      hasShareRewardGiven = true;
 
-        // 3. 공유창 띄우기
-        await Share.shareXFiles(
-          [XFile(imagePath.path)],
-          text: '[마음쉼표] 심리테스트 결과 "${result.resultTitle}"\n나도 하러가기 👉 http://www.rowanzone.co.kr/mind',
-        );
-
-        // 4. 공유창 닫고 돌아왔을 때 보상 지급!
-        _giveReward();
-      }
-    } catch (e) {
-      print("공유 실패: $e");
-      Get.snackbar("알림", "이미지 공유 중 오류가 발생했습니다.");
-    }
-  }
-
-  // 🎁 보상 지급 로직 (사과 2개)
-  void _giveReward() {
-    // 이미 받았으면 중단
-    if (hasReceivedReward) return;
-
-    // 거울 컨트롤러가 메모리에 있는지 확인
-    if (Get.isRegistered<MirrorController>()) {
-      final mirrorController = Get.find<MirrorController>();
-
-      // 🍎 사과 2개 추가!
-      mirrorController.appleCount.value += 2;
-
-      // 중복 방지 체크
-      hasReceivedReward = true;
-
-      // 축하 알림
+      // [수정] 스낵바 한글 제거
       Get.snackbar(
-        "보상 지급 완료! 🍎",
-        "공유 보상으로 황금 사과 2개를 얻었습니다!\n(거울 상담소 1회 무료 이용 가능)",
-        backgroundColor: Colors.white.withOpacity(0.9),
-        icon: const Icon(Icons.auto_awesome, color: Colors.amber),
-        duration: const Duration(seconds: 3),
-        snackPosition: SnackPosition.TOP,
-        margin: const EdgeInsets.all(10),
+          loc.shareRewardTitle,   // "공유 보상"
+          loc.shareRewardMessage, // "사과 2개 획득..."
+          backgroundColor: Colors.white,
+          snackPosition: SnackPosition.BOTTOM
+      );
+    }
+  }
+
+  void goHome() {
+    Get.offAllNamed(Routes.HOME);
+  }
+
+  Future<void> shareResultImage() async {
+    // [중요] 다국어 객체 가져오기
+    final loc = AppLocalizations.of(Get.context!)!;
+
+    try {
+      final Uint8List? imageBytes = await screenshotController.capture();
+      if (imageBytes == null) return;
+
+      final directory = await getTemporaryDirectory();
+      final imagePath = await File('${directory.path}/result_share.png').create();
+      await imagePath.writeAsBytes(imageBytes);
+
+      // [수정] 공유 멘트 한글 제거
+      await Share.shareXFiles(
+          [XFile(imagePath.path)],
+          text: loc.shareViralText // "소름 돋아!..." 멘트
+      );
+
+      _giveShareReward();
+
+    } catch (e) {
+      print("Share Error: $e");
+      // [수정] 에러 메시지 한글 제거
+      Get.snackbar(
+          loc.errorTitle,     // "오류"
+          loc.shareErrorMessage, // "공유 실패..."
+          backgroundColor: Colors.white
       );
     }
   }

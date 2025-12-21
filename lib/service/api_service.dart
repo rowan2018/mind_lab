@@ -1,45 +1,19 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:get/get.dart'; // 디바이스 언어 확인용
+import 'package:get/get.dart'; // 폰 언어 확인용
 import 'package:rowan_mind_lab/data/models.dart';
+
 class ApiService {
-  // 기본 도메인 (뒤에 /ko, /en 등이 붙을 예정)
-  static const String domain = "http://www.rowanzone.co.kr/mind";
+  // ✅ HTTPS 적용된 대표님 도메인
+  static const String domain = "https://www.rowanzone.co.kr/mind";
 
-  // ⭐ 현재 언어에 맞는 URL을 만들어주는 함수
-  // ⭐ 현재 언어에 맞는 URL을 만들어주는 함수
-  static String getBaseUrl() {
-    // 1. 핸드폰 시스템 언어 코드 가져오기 (실패 시 영어 'en'으로 설정)
-    String langCode = Get.deviceLocale?.languageCode ?? 'en';
-
-    // 2. 혹시라도 'kr'로 인식되면 'ko'로 고쳐줌 (안전장치)
-    if (langCode == 'kr') langCode = 'ko';
-
-    // 3. 지원하는 언어(한국어, 일본어)가 아니면 영어(en)로 통일
-    if (langCode != 'ko' && langCode != 'ja') {
-      langCode = 'en';
-    }
-
-    // 디버깅용: 실제 어떤 주소로 가는지 로그 출력 (Run 탭에서 확인 가능)
-    print("현재 언어 코드: $langCode -> 요청 주소: $domain/$langCode");
-
-    // 결과: http://www.rowanzone.co.kr/mind/ko
-    return "$domain/$langCode";
-  }
-
-  // 명언 가져오기
+  // 1. 명언 가져오기
   static Future<List<DailyQuote>> fetchQuotes() async {
     try {
-      // getBaseUrl()을 사용해서 동적으로 주소 생성
-      final url = "${getBaseUrl()}/daily.json";
+      final url = "$domain/daily.json";
+      print("명언 요청: $url");
 
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-          "Accept": "application/json",
-        },
-      );
+      final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200 && response.body.isNotEmpty) {
         String body = utf8.decode(response.bodyBytes);
@@ -49,23 +23,18 @@ class ApiService {
         return [];
       }
     } catch (e) {
-      print("명언 로드 실패: $e");
+      print("명언 에러: $e");
       return [];
     }
   }
 
-  // 테스트 목록 가져오기
+  // 2. 테스트 목록 가져오기
   static Future<List<TestItem>> fetchTests() async {
     try {
-      // 여기도 getBaseUrl() 사용
-      final url = "${getBaseUrl()}/tests.json";
+      final url = "$domain/tests.json";
+      print("테스트 요청: $url");
 
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          "User-Agent": "Mozilla/5.0",
-        },
-      );
+      final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200 && response.body.isNotEmpty) {
         String body = utf8.decode(response.bodyBytes);
@@ -75,8 +44,41 @@ class ApiService {
         return [];
       }
     } catch (e) {
-      print("테스트 목록 로드 실패: $e");
+      print("테스트 에러: $e");
       return [];
+    }
+  }
+
+  // ⭐ 3. [신규 추가] 지니에게 직접 소원 빌기 (채팅)
+  static Future<String> sendToGenie(String question) async {
+    try {
+      // server.js의 경로는 '/ask-mirror' 입니다.
+      // Nginx 설정상 /mind 경로를 통해 3000번 포트로 연결된다면 아래 주소가 맞습니다.
+      final url = "$domain/ask-mirror";
+
+      print("🧞‍♂️ 지니 호출: $url");
+
+      // 현재 폰 언어 감지 (ko, en, ja)
+      String langCode = Get.deviceLocale?.languageCode ?? 'ko';
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "question": question,
+          "lang": langCode // 언어 정보도 같이 보냄 (지니가 알아서 통역!)
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(utf8.decode(response.bodyBytes));
+        return data['answer']; // 지니의 답변 리턴
+      } else {
+        return "지니가 응답하지 않는구나... (통신 오류: ${response.statusCode})";
+      }
+    } catch (e) {
+      print("지니 통신 에러: $e");
+      return "마력이 부족해... 인터넷 연결을 확인하거라.";
     }
   }
 }

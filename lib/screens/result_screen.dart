@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:rowan_mind_lab/controller/result_controller.dart';
-import 'package:rowan_mind_lab/l10n/app_localizations.dart'; // import 필수
+import 'package:rowan_mind_lab/l10n/app_localizations.dart';
 import 'package:rowan_mind_lab/controller/mirror_controller.dart';
 
 class ResultScreen extends GetView<ResultController> {
@@ -18,12 +18,12 @@ class ResultScreen extends GetView<ResultController> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!; // l10n 생성
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: bgBase,
       appBar: AppBar(
-        title: Text(l10n.resultPageTitle, // "테스트 결과"
+        title: Text(l10n.resultPageTitle,
             style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: textDark)),
         backgroundColor: bgBase,
         centerTitle: true,
@@ -31,9 +31,12 @@ class ResultScreen extends GetView<ResultController> {
         elevation: 0,
       ),
       body: SafeArea(
+        // [수정 1] 스크롤 무조건 동작하게 설정
         child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
           child: Column(
+            mainAxisSize: MainAxisSize.min, // 내용물 크기에 맞춤
             children: [
               Screenshot(
                 controller: controller.screenshotController,
@@ -102,7 +105,7 @@ class ResultScreen extends GetView<ResultController> {
                                 children: [
                                   Icon(Icons.broken_image_rounded, size: 40.sp, color: Colors.grey[400]),
                                   SizedBox(height: 8.h),
-                                  Text(l10n.errorImage, // "이미지 없음"
+                                  Text(l10n.errorImage,
                                       style: TextStyle(fontSize: 12.sp, color: Colors.grey)),
                                 ],
                               ),
@@ -130,10 +133,11 @@ class ResultScreen extends GetView<ResultController> {
               ),
 
               SizedBox(height: 30.h),
-              _buildSecretGiftButton(l10n), // l10n 전달
+              _buildSecretGiftButton(l10n),
 
               SizedBox(height: 20.h),
 
+              // [수정 2] 버튼 텍스트가 길어도 한 줄로 줄어들게 처리
               Row(
                 children: [
                   Expanded(
@@ -151,8 +155,14 @@ class ResultScreen extends GetView<ResultController> {
                         children: [
                           Icon(Icons.share_rounded, size: 20.sp),
                           SizedBox(width: 8.w),
-                          Text(l10n.btnShareReward, // "공유하고 🍎받기"
-                              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                          // 텍스트가 공간이 부족하면 자동으로 작아짐
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(l10n.btnShareReward,
+                                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -168,13 +178,18 @@ class ResultScreen extends GetView<ResultController> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
                         elevation: 0,
                       ),
-                      child: Text(l10n.btnRetry, // "다른 테스트 하기"
-                          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                      // 텍스트가 공간이 부족하면 자동으로 작아짐
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(l10n.btnRetry,
+                            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                      ),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 20.h),
+              // 하단 여백 충분히 확보
+              SizedBox(height: 50.h),
             ],
           ),
         ),
@@ -185,13 +200,14 @@ class ResultScreen extends GetView<ResultController> {
   Widget _buildSecretGiftButton(AppLocalizations l10n) {
     final mirrorController = Get.put(MirrorController());
 
+    // [수정 3] Obx 제거 - 에러 원인 해결
+    // mirrorController가 단순 변수라면 Obx 없이 조건문만 쓰면 됩니다.
     if (!mirrorController.isAdEnabled) {
       return const SizedBox.shrink();
     }
 
     return GestureDetector(
       onTap: () {
-        // "알림", "곧 광고 기능이..."
         Get.snackbar(l10n.alertTitle, l10n.adUpdateMsg, backgroundColor: Colors.white);
       },
       child: Container(
@@ -220,10 +236,14 @@ class ResultScreen extends GetView<ResultController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l10n.adTitle, // "신비한 몰약이..."
+                  Text(l10n.adTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: textDark)),
                   SizedBox(height: 2.h),
-                  Text(l10n.adDesc, // "광고 보고..."
+                  Text(l10n.adDesc,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(fontSize: 12.sp, color: Colors.grey[600])),
                 ],
               ),

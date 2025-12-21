@@ -25,5 +25,17 @@
   "adTitle": "神秘の没薬が必要ですか？",
   "adDesc": "広告を見てリンゴと没薬セットを獲得",
   "alertTitle": "お知らせ",
-  "adUpdateMsg": "広告機能はまもなくアップデートされます！"
+  "adUpdateMsg": "広告機能はまもなくアップデートされます！",
+  "settingsTitle": "設定",
+  "settingsPushTitle": "プッシュ通知",
+  "settingsPushDesc": "毎週月曜の朝、名言通知を受け取ります",
+  "settingsVersion": "現在のバージョン",
+  "settingsAlarmOn": "通知がオンになりました 🔔",
+  "settingsAlarmOff": "通知がオフになりました 🔕",
+  "errorTitle": "エラー",
+  "errorLoadData": "結果データを読み込めませんでした。",
+  "shareRewardTitle": "シェア報酬",
+  "shareRewardMessage": "友達にシェアして🍎2個を追加で獲得しました！",
+  "shareViralText": "このテスト、鳥肌モノ！😱 あなたもやってみて！ \n#心理テスト #マインドコンマ",
+  "shareErrorMessage": "シェアできません。"
 }

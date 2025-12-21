@@ -25,5 +25,18 @@
   "adTitle": "신비한 몰약이 필요하신가요?",
   "adDesc": "광고 보고 사과&몰약 세트 받기",
   "alertTitle": "알림",
-  "adUpdateMsg": "곧 광고 기능이 업데이트됩니다!"
+  "adUpdateMsg": "곧 광고 기능이 업데이트됩니다!",
+  "settingsTitle": "설정",
+  "settingsPushTitle": "푸시 알림",
+  "settingsPushDesc": "매주 월요일 아침, 명언 알림을 받습니다",
+  "settingsVersion": "현재 버전",
+  "settingsAlarmOn": "알림이 켜졌습니다 🔔",
+  "settingsAlarmOff": "알림이 꺼졌습니다 🔕",
+  "errorTitle": "오류",
+  "errorLoadData": "결과 데이터를 불러오지 못했습니다.",
+  "shareRewardTitle": "공유 보상",
+  "shareRewardMessage": "친구에게 공유하고 🍎 2개를 추가로 받았습니다!",
+  "shareViralText": "이 테스트 완전 소름돋아! 😱 너도 한번 해봐! \n#심리테스트 #로완마인드랩",
+  "shareErrorMessage": "공유하기를 실행할 수 없습니다."
+
 }

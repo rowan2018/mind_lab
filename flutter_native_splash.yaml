@@ -1,0 +1,19 @@
+flutter_native_splash:
+  # color: "#FFFFFF"  <-- 단색 배경은 끄거나 지웁니다.
+
+  # 배경으로 깔고 싶은 이미지 (전체 화면 꽉 차게 늘어납니다)
+  background_image: "assets/images/splash_bg.png"
+
+  # 중앙 로고 (배경 위에 로고를 따로 띄울 경우 사용, 배경 이미지에 로고가 포함되어 있다면 생략 가능)
+#  image: "assets/images/splash.png"
+
+  android: true
+  ios: true
+  fullscreen: true
+
+  # ▼▼▼ 중요: 안드로이드 12 이상 설정 ▼▼▼
+  android_12:
+    # 안드로이드 12+는 시스템 정책상 '배경 이미지'를 지원하지 않습니다.
+    # 그래서 여기서는 어울리는 '단색'을 지정해줘야 합니다.
+    color: "#FFFFFF"
+    image: "assets/images/splash12.png"
