@@ -44,5 +44,10 @@
   "shareRewardTitle": "Share Reward",
   "shareRewardMessage": "You shared with a friend and got 2 extra 🍎!",
   "shareViralText": "This test gave me goosebumps! 😱 You should try it too! \n#PsychologyTest #RowanMindLab",
-  "shareErrorMessage": "Unable to share."
+  "shareErrorMessage": "Unable to share.",
+  "adRewardTitle": "Success!",
+  "adRewardMsg": "You earned a reward!",
+  "adLoadingTitle": "Hold on",
+  "adLoadingMsg": "Loading ad. Please try again in a moment.",
+  "share_answer": "Share this answer"
 }

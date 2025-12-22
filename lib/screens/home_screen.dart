@@ -6,9 +6,20 @@ import 'package:rowan_mind_lab/controller/home_controller.dart';
 import 'package:rowan_mind_lab/routers/routers.dart';
 import 'package:rowan_mind_lab/screens/mirror_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart'; // 광고 패키지
+import 'dart:io';
 
-class HomeScreen extends GetView<HomeController> {
+// 광고 로딩을 위해 StatefulWidget으로 변경
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  // GetView를 뺐으므로 controller 직접 찾기
+  final HomeController controller = Get.find<HomeController>();
 
   static const Color bgBase = Color(0xFFFFFCFC);
   static const Color mainPoint = Color(0xFFFF9EAA);
@@ -16,9 +27,95 @@ class HomeScreen extends GetView<HomeController> {
   static const Color textDark = Color(0xFF5D4037);
   static const Color borderLine = Color(0xFFFFCDD2);
 
+  // ================= 광고 변수 (보상형) =================
+  RewardedAd? _rewardedAd;
+  bool _isRewardedLoaded = false;
+
+  // ⚠️ [중요] 실제 보상형 광고 ID로 교체하세요!
+  final String rewardedId = Platform.isAndroid
+      ? 'ca-app-pub-3940256099942544/5224354917' // 안드로이드 테스트 ID
+      : 'ca-app-pub-9790456886445737/6552212239'; // iOS 테스트 ID
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRewardedAd(); // 들어오자마자 광고 장전
+  }
+
+  @override
+  void dispose() {
+    _rewardedAd?.dispose();
+    super.dispose();
+  }
+
+  // 보상형 광고 로드
+  void _loadRewardedAd() {
+    RewardedAd.load(
+      adUnitId: rewardedId,
+      request: const AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (ad) {
+          if (mounted) {
+            setState(() {
+              _rewardedAd = ad;
+              _isRewardedLoaded = true;
+            });
+          }
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              ad.dispose();
+              _loadRewardedAd(); // 리필
+            },
+            onAdFailedToShowFullScreenContent: (ad, err) {
+              ad.dispose();
+              _loadRewardedAd();
+            },
+          );
+        },
+        onAdFailedToLoad: (err) {
+          print('메인 보상형광고 실패: ${err.message}');
+          if (mounted) {
+            setState(() {
+              _isRewardedLoaded = false;
+            });
+          }
+        },
+      ),
+    );
+  }
+
+  // 보상형 광고 보여주기
+  void showRewarded() {
+    final l10n = AppLocalizations.of(context)!;
+
+    if (_isRewardedLoaded && _rewardedAd != null) {
+      setState(() => _isRewardedLoaded = false); // 잠금
+      _rewardedAd!.show(
+        onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
+          controller.addApple(3); // or Get.find<HomeController>().addApple(3);
+          Get.snackbar(
+            l10n.adRewardTitle,
+            l10n.adRewardMsg,
+            backgroundColor: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+            duration: const Duration(seconds: 2),
+          );
+        },
+      );
+    } else {
+      Get.snackbar(
+        l10n.adLoadingTitle,
+        l10n.adLoadingMsg,
+        backgroundColor: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  // ================= UI 시작 =================
+
   @override
   Widget build(BuildContext context) {
-    // 1. 다국어 객체 가져오기
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -38,8 +135,8 @@ class HomeScreen extends GetView<HomeController> {
         centerTitle: false,
         actions: [
           IconButton(
-            // 아이콘 클릭 시 설정창(바텀시트) 띄우기
-            icon: Icon(Icons.settings_outlined, color: textDark.withOpacity(0.5), size: 24.sp),
+            icon: Icon(Icons.settings_outlined,
+                color: textDark.withOpacity(0.5), size: 24.sp),
             onPressed: () {
               _showSettingBottomSheet(context);
             },
@@ -49,7 +146,8 @@ class HomeScreen extends GetView<HomeController> {
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator(color: mainPoint));
+          return const Center(
+              child: CircularProgressIndicator(color: mainPoint));
         }
         return SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
@@ -60,17 +158,23 @@ class HomeScreen extends GetView<HomeController> {
 
               // TODAY 섹션
               Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline, // 텍스트 라인 맞춤
+                crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
                 children: [
-                  Text("TODAY", style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: mainPoint)),
+                  Text("TODAY",
+                      style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.bold,
+                          color: mainPoint)),
                   SizedBox(width: 8.w),
-                  // 🔥 [수정 1] 텍스트가 길어지면 줄바꿈 되도록 Expanded 적용
                   Expanded(
                     child: Text(
                       l10n.homeDailyTitle,
-                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: textDark),
-                      maxLines: 1, // 혹은 2줄 허용하려면 2로 변경
+                      style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: textDark),
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -79,6 +183,11 @@ class HomeScreen extends GetView<HomeController> {
               SizedBox(height: 12.h),
               _buildDailyCard(),
 
+              SizedBox(height: 20.h),
+
+              // 🔥 [추가] 시크릿 선물 버튼 (명언 아래에 배치)
+              _buildSecretGiftButton(l10n),
+
               SizedBox(height: 30.h),
 
               // SECRET 섹션
@@ -86,13 +195,19 @@ class HomeScreen extends GetView<HomeController> {
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
                 children: [
-                  Text("SECRET", style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: const Color(0xFF6A00FF))),
+                  Text("SECRET",
+                      style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF6A00FF))),
                   SizedBox(width: 8.w),
-                  // 🔥 [수정 2] 가로 오버플로우 방지
                   Expanded(
                     child: Text(
                       l10n.secretTitle,
-                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: textDark),
+                      style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: textDark),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -109,13 +224,19 @@ class HomeScreen extends GetView<HomeController> {
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
                 children: [
-                  Text("TEST", style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: mainPoint)),
+                  Text("TEST",
+                      style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.bold,
+                          color: mainPoint)),
                   SizedBox(width: 8.w),
-                  // 🔥 [수정 3] 가로 오버플로우 방지
                   Expanded(
                     child: Text(
                       l10n.homeTestTitle,
-                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: textDark),
+                      style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: textDark),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -143,12 +264,68 @@ class HomeScreen extends GetView<HomeController> {
         height: 40.h,
         color: Colors.white,
         alignment: Alignment.center,
-        child: Text(" ", style: TextStyle(color: Colors.grey[300], fontSize: 12.sp)),
+        child: Text(" ",
+            style: TextStyle(color: Colors.grey[300], fontSize: 12.sp)),
       ),
     );
   }
 
-  // ✨ l10n을 인자로 받아서 텍스트 처리
+  // 🔥 [추가] 시크릿 선물 버튼 위젯
+  Widget _buildSecretGiftButton(AppLocalizations l10n) {
+    return GestureDetector(
+      onTap: showRewarded,
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: const Color(0xFFE0E0E0)),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 10,
+                offset: const Offset(0, 4)),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(10.w),
+              decoration: const BoxDecoration(
+                color: subPoint,
+                shape: BoxShape.circle,
+              ),
+              child: Text("🎁", style: TextStyle(fontSize: 22.sp)),
+            ),
+            SizedBox(width: 14.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.adTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                          color: textDark)),
+                  SizedBox(height: 2.h),
+                  Text(l10n.adDesc,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontSize: 12.sp, color: Colors.grey[600])),
+                ],
+              ),
+            ),
+            Icon(Icons.play_circle_fill_rounded, color: mainPoint, size: 30.sp),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildMirrorCard(AppLocalizations l10n) {
     return GestureDetector(
       onTap: () {
@@ -209,7 +386,6 @@ class HomeScreen extends GetView<HomeController> {
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
-                          // 🔥 [수정 4] 거울 카드 내부 텍스트 오버플로우 방지
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -220,7 +396,6 @@ class HomeScreen extends GetView<HomeController> {
                             fontSize: 13.sp,
                             color: Colors.white70,
                           ),
-                          // 🔥 [수정 5] 설명글 오버플로우 방지
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -228,7 +403,8 @@ class HomeScreen extends GetView<HomeController> {
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+                    padding:
+                    EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
                     decoration: BoxDecoration(
                         color: const Color(0xFFFFD700),
                         borderRadius: BorderRadius.circular(20.r),
@@ -238,8 +414,7 @@ class HomeScreen extends GetView<HomeController> {
                             blurRadius: 4,
                             offset: const Offset(1, 2),
                           )
-                        ]
-                    ),
+                        ]),
                     child: Row(
                       children: [
                         Text(
@@ -251,7 +426,8 @@ class HomeScreen extends GetView<HomeController> {
                           ),
                         ),
                         SizedBox(width: 4.w),
-                        Icon(Icons.arrow_forward_rounded, size: 14.sp, color: const Color(0xFF2E1A47)),
+                        Icon(Icons.arrow_forward_rounded,
+                            size: 14.sp, color: const Color(0xFF2E1A47)),
                       ],
                     ),
                   ),
@@ -281,7 +457,8 @@ class HomeScreen extends GetView<HomeController> {
       ),
       child: Column(
         children: [
-          Icon(Icons.format_quote_rounded, size: 36.sp, color: mainPoint.withOpacity(0.3)),
+          Icon(Icons.format_quote_rounded,
+              size: 36.sp, color: mainPoint.withOpacity(0.3)),
           SizedBox(height: 12.h),
           Text(
             controller.todayQuote.value.content,
@@ -348,11 +525,13 @@ class HomeScreen extends GetView<HomeController> {
                   test.thumbnailUrl,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    return Icon(Icons.broken_image_rounded, color: Colors.grey, size: 30.sp);
+                    return Icon(Icons.broken_image_rounded,
+                        color: Colors.grey, size: 30.sp);
                   },
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
-                    return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+                    return const Center(
+                        child: CircularProgressIndicator(strokeWidth: 2));
                   },
                 ),
               ),
@@ -409,7 +588,6 @@ class HomeScreen extends GetView<HomeController> {
   }
 
   void _showSettingBottomSheet(BuildContext context) {
-    // 1. 여기서 번역 객체 가져오기
     final l10n = AppLocalizations.of(context)!;
 
     Get.bottomSheet(
@@ -423,30 +601,30 @@ class HomeScreen extends GetView<HomeController> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 제목: 설정
             Text(
               l10n.settingsTitle,
-              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: textDark),
+              style: TextStyle(
+                  fontSize: 20.sp, fontWeight: FontWeight.bold, color: textDark),
             ),
             SizedBox(height: 24.h),
-
-            // 알림 스위치
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 제목: 푸시 알림
                     Text(
                       l10n.settingsPushTitle,
-                      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: textDark),
+                      style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                          color: textDark),
                     ),
                     SizedBox(height: 4.h),
-                    // 설명: 매일 명언과...
                     Text(
                       l10n.settingsPushDesc,
-                      style: TextStyle(fontSize: 12.sp, color: textDark.withOpacity(0.5)),
+                      style: TextStyle(
+                          fontSize: 12.sp, color: textDark.withOpacity(0.5)),
                     ),
                   ],
                 ),
@@ -460,15 +638,16 @@ class HomeScreen extends GetView<HomeController> {
                         setState(() {
                           isSwitched = value;
                         });
-
                         if (value) {
-                          // 알림 켜짐 메시지
-                          Get.snackbar(l10n.settingsPushTitle, l10n.settingsAlarmOn,
-                              snackPosition: SnackPosition.BOTTOM, margin: EdgeInsets.all(20.w));
+                          Get.snackbar(
+                              l10n.settingsPushTitle, l10n.settingsAlarmOn,
+                              snackPosition: SnackPosition.BOTTOM,
+                              margin: EdgeInsets.all(20.w));
                         } else {
-                          // 알림 꺼짐 메시지
-                          Get.snackbar(l10n.settingsPushTitle, l10n.settingsAlarmOff,
-                              snackPosition: SnackPosition.BOTTOM, margin: EdgeInsets.all(20.w));
+                          Get.snackbar(
+                              l10n.settingsPushTitle, l10n.settingsAlarmOff,
+                              snackPosition: SnackPosition.BOTTOM,
+                              margin: EdgeInsets.all(20.w));
                         }
                       },
                     );
@@ -477,14 +656,10 @@ class HomeScreen extends GetView<HomeController> {
               ],
             ),
             SizedBox(height: 30.h),
-
-            // 버전 정보
             FutureBuilder<PackageInfo>(
-              future: PackageInfo.fromPlatform(), // 앱 정보 가져오기
+              future: PackageInfo.fromPlatform(),
               builder: (context, snapshot) {
-                // 아직 로딩 중이거나 데이터 없으면 기본값 '...'
                 String version = snapshot.data?.version ?? '...';
-
                 return Container(
                   width: double.infinity,
                   padding: EdgeInsets.all(16.w),
@@ -494,7 +669,8 @@ class HomeScreen extends GetView<HomeController> {
                   ),
                   child: Text(
                     "${l10n.settingsVersion}: $version",
-                    style: TextStyle(color: textDark.withOpacity(0.6), fontSize: 13.sp),
+                    style: TextStyle(
+                        color: textDark.withOpacity(0.6), fontSize: 13.sp),
                     textAlign: TextAlign.center,
                   ),
                 );

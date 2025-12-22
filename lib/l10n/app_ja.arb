@@ -37,5 +37,10 @@
   "shareRewardTitle": "シェア報酬",
   "shareRewardMessage": "友達にシェアして🍎2個を追加で獲得しました！",
   "shareViralText": "このテスト、鳥肌モノ！😱 あなたもやってみて！ \n#心理テスト #マインドコンマ",
-  "shareErrorMessage": "シェアできません。"
+  "shareErrorMessage": "シェアできません。",
+  "adRewardTitle": "成功！",
+  "adRewardMsg": "報酬を獲得しました！",
+  "adLoadingTitle": "少々お待ちください",
+  "adLoadingMsg": "広告を読み込んでいます。しばらくしてからもう一度お試しください。",
+  "share_answer": "この回答を共有する"
 }

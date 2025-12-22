@@ -69,7 +69,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
       }
 
       var allTests = await ApiService.fetchTests();
-      const int maxDisplayCount = 5;
+      const int maxDisplayCount = 10;
 
       var newTests = allTests.where((t) => (t.status ?? "").toUpperCase() == "NEW").toList();
       var oldTests = allTests.where((t) => (t.status ?? "").toUpperCase() != "NEW").toList();

@@ -37,6 +37,11 @@
   "shareRewardTitle": "공유 보상",
   "shareRewardMessage": "친구에게 공유하고 🍎 2개를 추가로 받았습니다!",
   "shareViralText": "이 테스트 완전 소름돋아! 😱 너도 한번 해봐! \n#심리테스트 #로완마인드랩",
-  "shareErrorMessage": "공유하기를 실행할 수 없습니다."
+  "shareErrorMessage": "공유하기를 실행할 수 없습니다.",
+  "adRewardTitle": "성공!",
+  "adRewardMsg": "보상을 획득했습니다!",
+  "adLoadingTitle": "잠시만요",
+  "adLoadingMsg": "광고를 불러오는 중입니다. 잠시 후 다시 시도해주세요.",
+  "share_answer": "이 답변 공유하기"
 
 }

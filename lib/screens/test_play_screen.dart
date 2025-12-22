@@ -3,16 +3,130 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rowan_mind_lab/controller/test_play_controller.dart';
 import 'package:rowan_mind_lab/data/models.dart';
-// import 'package:rowan_mind_lab/l10n/app_localizations.dart'; // 필요시 주석 해제
+import 'package:google_mobile_ads/google_mobile_ads.dart'; // 광고 패키지
+import 'dart:io'; // 플랫폼 확인용
 
-class TestPlayScreen extends GetView<TestPlayController> {
+// GetView 대신 StatefulWidget으로 변경 (광고 상태 관리)
+class TestPlayScreen extends StatefulWidget {
   const TestPlayScreen({super.key});
+
+  @override
+  State<TestPlayScreen> createState() => _TestPlayScreenState();
+}
+
+class _TestPlayScreenState extends State<TestPlayScreen> {
+  // GetView를 뺐으므로 controller를 직접 찾습니다.
+  final TestPlayController controller = Get.find<TestPlayController>();
 
   static const Color bgBase = Color(0xFFFFFCFC);
   static const Color mainPoint = Color(0xFFFF9EAA);
   static const Color subPoint = Color(0xFFFFF0F1);
   static const Color textDark = Color(0xFF5D4037);
   static const Color borderLine = Color(0xFFFFCDD2);
+
+  // ================= 광고 변수 =================
+  InterstitialAd? _interstitialAd;
+  bool _isAdLoaded = false;
+
+  // ⚠️ [중요] 여기에 아까 메모장에 적은 '진짜 전면광고 ID'를 넣으세요!
+  // 지금은 테스트 ID입니다.
+  final String interstitialId = Platform.isAndroid
+      ? 'ca-app-pub-9790456886445737/4752045409' // 개발자님의 안드로이드 실제 전면광고 ID
+      : 'ca-app-pub-9790456886445737/3110185897';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInterstitialAd(); // 들어오자마자 광고 장전!
+  }
+
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: interstitialId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          if (!mounted) {
+            ad.dispose();
+            return;
+          }
+
+          _interstitialAd = ad;
+          _isAdLoaded = true;
+
+          // 콜백은 로드시 한 번만 세팅해두는 게 안전
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              ad.dispose();
+              _loadInterstitialAd(); // 다음번 대비 재장전
+            },
+            onAdFailedToShowFullScreenContent: (ad, err) {
+              ad.dispose();
+              _loadInterstitialAd(); // 실패해도 재장전
+            },
+          );
+
+          setState(() {});
+        },
+        onAdFailedToLoad: (err) {
+          if (!mounted) return;
+          _isAdLoaded = false;
+          _interstitialAd = null;
+          // 너무 시끄러우면 print 줄이기
+          debugPrint('전면광고 로드 실패: ${err.message}');
+          setState(() {});
+        },
+      ),
+    );
+  }
+
+  void _onOptionSelected(int score) {
+    final isLastQuestion = controller.currentQuestionIndex.value ==
+        controller.testItem.questions.length - 1;
+
+    if (!isLastQuestion) {
+      controller.selectOption(score);
+      return;
+    }
+
+    // 마지막 문제면 광고 우선 시도
+    final ad = _interstitialAd;
+    if (_isAdLoaded && ad != null) {
+      // 중복 show 방지: show 직전에 상태 내려버림
+      _isAdLoaded = false;
+      _interstitialAd = null;
+
+      // 광고 닫힌 뒤 결과로 보내기
+      // (광고가 안 떠도 아래 onAdFailedToShow에서 selectOption 호출)
+      ad.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (ad) {
+          ad.dispose();
+          controller.selectOption(score);
+          _loadInterstitialAd();
+        },
+        onAdFailedToShowFullScreenContent: (ad, err) {
+          ad.dispose();
+          controller.selectOption(score);
+          _loadInterstitialAd();
+        },
+      );
+
+      ad.show();
+    } else {
+      // 광고 없으면 그냥 결과
+      controller.selectOption(score);
+
+      // (선택) 마지막문제 도달했는데 광고가 없었다면 다시 로드 시도
+      if (!_isAdLoaded) _loadInterstitialAd();
+    }
+  }
+
+
+  @override
+  void dispose() {
+    _interstitialAd?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,16 +137,19 @@ class TestPlayScreen extends GetView<TestPlayController> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: textDark, size: 20.sp),
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
+              color: textDark, size: 20.sp),
           onPressed: () => Get.back(),
         ),
         title: Text(
           controller.testItem.title,
-          style: TextStyle(fontSize: 14.sp, color: textDark.withOpacity(0.6), fontWeight: FontWeight.normal),
+          style: TextStyle(
+              fontSize: 14.sp,
+              color: textDark.withOpacity(0.6),
+              fontWeight: FontWeight.normal),
         ),
       ),
       body: SafeArea(
-        // 🔥 [수정 1] 화면이 작아도 무조건 스크롤 되도록 SingleChildScrollView 적용
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
           child: Column(
@@ -62,7 +179,7 @@ class TestPlayScreen extends GetView<TestPlayController> {
                 ],
               )),
 
-              SizedBox(height: 30.h), // 간격 조금 줄임 (작은 화면 대응)
+              SizedBox(height: 30.h),
 
               // 질문 텍스트 박스
               Container(
@@ -97,8 +214,8 @@ class TestPlayScreen extends GetView<TestPlayController> {
 
               // 선택지 버튼 목록
               Obx(() => ListView.separated(
-                physics: const NeverScrollableScrollPhysics(), // 이중 스크롤 방지
-                shrinkWrap: true, // 내용물 크기만큼만 차지
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
                 itemCount: controller.currentQuestion.options.length,
                 separatorBuilder: (_, __) => SizedBox(height: 16.h),
                 itemBuilder: (context, index) {
@@ -107,7 +224,7 @@ class TestPlayScreen extends GetView<TestPlayController> {
                 },
               )),
 
-              SizedBox(height: 40.h), // 하단 여백
+              SizedBox(height: 40.h),
             ],
           ),
         ),
@@ -117,8 +234,9 @@ class TestPlayScreen extends GetView<TestPlayController> {
 
   Widget _buildOptionButton(Option option) {
     return GestureDetector(
+      // [수정] 기존 controller.selectOption 대신 _onOptionSelected 사용
       onTap: () {
-        controller.selectOption(option.score);
+        _onOptionSelected(option.score);
       },
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 20.w),
@@ -135,7 +253,7 @@ class TestPlayScreen extends GetView<TestPlayController> {
           ],
         ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center, // 세로 중앙 정렬
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CircleAvatar(
               radius: 12.r,
@@ -143,9 +261,6 @@ class TestPlayScreen extends GetView<TestPlayController> {
               child: Icon(Icons.check_rounded, color: mainPoint, size: 16.sp),
             ),
             SizedBox(width: 16.w),
-
-            // 🔥 [수정 2] 가로 오버플로우(Right Overflow) 해결의 핵심!
-            // Expanded로 감싸야 글자가 길 때 다음 줄로 넘어갑니다.
             Expanded(
               child: Text(
                 option.text,
@@ -155,8 +270,8 @@ class TestPlayScreen extends GetView<TestPlayController> {
                   color: textDark,
                   height: 1.2,
                 ),
-                maxLines: 3, // 너무 길 경우 최대 3줄
-                overflow: TextOverflow.ellipsis, // 3줄 넘어가면 ... 처리
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

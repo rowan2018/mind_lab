@@ -168,7 +168,7 @@ class MirrorScreen extends StatelessWidget {
                                         Icon(Icons.share_rounded, color: Colors.amber, size: 16.sp),
                                         SizedBox(width: 8.w),
                                         Text(
-                                            "이 답변 공유하기",
+                                            l10n.share_answer,
                                             style: TextStyle(
                                                 color: Colors.amber,
                                                 fontWeight: FontWeight.bold,
