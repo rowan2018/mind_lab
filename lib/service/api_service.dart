@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rowan_mind_lab/data/models.dart';
+import 'package:flutter/foundation.dart';
+
 
 
 class ApiService {
@@ -34,7 +36,6 @@ class ApiService {
       final res = await http
           .get(Uri.parse(url))
           .timeout(const Duration(seconds: 10));
-
       if (res.statusCode != 200 || res.bodyBytes.isEmpty) {
         return [];
       }
@@ -81,8 +82,12 @@ class ApiService {
     }
   }
 
-  static Future<String> sendToGenie(String question, {required String langCode}) async {
-    final url = "$domain/ask-mirror";
+  static Future<String> sendToGenieChat(
+      String question, {
+        required String langCode,
+      }) async {
+    final url = "$domain/ask-mirror"; // ✅ 기존 상담 엔드포인트
+
     try {
       final res = await http
           .post(
@@ -98,6 +103,7 @@ class ApiService {
 
       final data = jsonDecode(utf8.decode(res.bodyBytes));
       final answer = data is Map ? data["answer"] : null;
+
       return (answer is String && answer.trim().isNotEmpty)
           ? answer
           : "지니가 헛소리를 하는군. 다시 빌어라.";
@@ -105,4 +111,48 @@ class ApiService {
       return "마력이 부족해... 인터넷 연결을 확인하거라.";
     }
   }
+
+  static Future<String> sendToGenieResult(
+      String question, {
+        required String langCode,
+        required String title,
+        required String desc,
+      }) async {
+    final url = "$domain/ask-mirror-result"; // ✅ 결과 전용 엔드포인트
+
+    final payload = <String, dynamic>{
+      "question": question, // 짧게: "핵심만 현실적으로 조언해줘"
+      "lang": langCode,
+      "title": title.trim(),
+      "desc": desc.trim(),
+    };
+
+    try {
+      final res = await http
+          .post(
+        Uri.parse(url),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(payload),
+      )
+
+          .timeout(const Duration(seconds: 20)); // 결과는 살짝 더 여유
+      debugPrint("✅ genie result status=${res.statusCode}");
+
+      if (res.statusCode != 200) {
+        return "지니가 응답하지 않는구나... (통신 오류: ${res.statusCode})";
+      }
+
+      final data = jsonDecode(utf8.decode(res.bodyBytes));
+      final answer = data is Map ? data["answer"] : null;
+
+      return (answer is String && answer.trim().isNotEmpty)
+          ? answer
+          : "지니가 헛소리를 하는군. 다시 빌어라.";
+
+    } catch (_) {
+      return "마력이 부족해... 인터넷 연결을 확인하거라.";
+    }
+  }
+
+
 }

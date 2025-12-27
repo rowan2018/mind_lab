@@ -19,6 +19,8 @@ class ResultController extends GetxController {
   bool hasResultRewardGiven = false;
   bool hasShareRewardGiven = false;
 
+
+
   @override
   void onInit() {
     super.onInit();
@@ -53,7 +55,7 @@ class ResultController extends GetxController {
 
     if (Get.isRegistered<HomeController>()) {
       final homeController = Get.find<HomeController>();
-      homeController.addApple(2);
+
       hasResultRewardGiven = true;
     }
   }
@@ -67,7 +69,7 @@ class ResultController extends GetxController {
 
     if (Get.isRegistered<HomeController>()) {
       final homeController = Get.find<HomeController>();
-      homeController.addApple(2);
+
       hasShareRewardGiven = true;
 
       // [수정] 스낵바 한글 제거

@@ -8,13 +8,26 @@ import 'package:rowan_mind_lab/service/notification_service.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 // 👇 [추가됨] 권한 요청 패키지
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'firebase_options.dart';
+import 'package:rowan_mind_lab/service/ad_manager.dart';
+import 'package:rowan_mind_lab/controller/home_controller.dart';
+import 'package:get_storage/get_storage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await MobileAds.instance.initialize();
+  MobileAds.instance.initialize();
+  AdManager.loadInterstitial();
+  await GetStorage.init();
+  Get.put(HomeController(), permanent: true);
   await NotificationService().init();
   await NotificationService().scheduleWeeklyNotification(true);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
 
   runApp(const MyApp());
 }

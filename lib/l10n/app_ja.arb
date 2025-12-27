@@ -18,29 +18,121 @@
   "mirrorLoading": "宇宙の気を\n集めています...",
   "mirrorGuide": "あなたの心の中の\n話を聞かせて。",
   "mirrorHint": "リンゴ{count}個で未来を覗いてみて。",
+  "@mirrorHint": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
 
   "resultPageTitle": "テスト結果",
   "errorImage": "画像なし",
   "btnShareReward": "シェアして🍎GET",
+
   "adTitle": "神秘の没薬が必要ですか？",
   "adDesc": "広告を見てリンゴと没薬セットを獲得",
+  "adLoadingTitle": "少々お待ちください",
+  "adLoadingMsg": "広告を読み込んでいます。しばらくしてからもう一度お試しください。",
+  "adRewardTitle": "報酬を獲得しました！",
+  "adRewardMsg": "リンゴを5個獲得しました 🍎\nジーニーともっと話してみてください。",
+
   "alertTitle": "お知らせ",
   "adUpdateMsg": "広告機能はまもなくアップデートされます！",
+
   "settingsTitle": "設定",
   "settingsPushTitle": "プッシュ通知",
   "settingsPushDesc": "毎週月曜の朝、名言通知を受け取ります",
   "settingsVersion": "現在のバージョン",
   "settingsAlarmOn": "通知がオンになりました 🔔",
   "settingsAlarmOff": "通知がオフになりました 🔕",
+
   "errorTitle": "エラー",
   "errorLoadData": "結果データを読み込めませんでした。",
+
   "shareRewardTitle": "シェア報酬",
   "shareRewardMessage": "友達にシェアして🍎2個を追加で獲得しました！",
-  "shareViralText": "このテスト、鳥肌モノ！😱 あなたもやってみて！ \n#心理テスト #マインドコンマ",
+  "shareViralText": "このテスト、鳥肌モノ！😱 あなたもやってみて！\n#心理テスト #マインドコンマ",
   "shareErrorMessage": "シェアできません。",
-  "adRewardTitle": "成功！",
-  "adRewardMsg": "報酬を獲得しました！",
-  "adLoadingTitle": "少々お待ちください",
-  "adLoadingMsg": "広告を読み込んでいます。しばらくしてからもう一度お試しください。",
-  "share_answer": "この回答を共有する"
+  "share_answer": "この回答を共有する",
+
+  "genieOpinionBtn": "ジーニーの意見を聞く",
+  "genieOpinionTitle": "ジーニーのひと言",
+  "genieOpinionLoading": "ジーニーが深く見ています…",
+  "genieOpinionError": "ジーニーの意見を取得できませんでした。",
+
+  "notEnoughApplesTitle": "リンゴが足りない",
+  "notEnoughApplesMsg": "ジーニーの意見を見るには 🍎 1個が必要です。",
+
+  "btnCancel": "キャンセル",
+
+  "notEnoughApplesMsg2": "不思議な鏡に質問するには\n黄金のりんごが {cost} 個必要です。\n（現在: {current} 個）",
+  "@notEnoughApplesMsg2": {
+    "placeholders": {
+      "cost": { "type": "int" },
+      "current": { "type": "int" }
+    }
+  },
+
+  "mirrorShareRewardTitle": "🍎 報酬獲得",
+  "mirrorShareRewardMsg": "共有報酬 +{count}（本日 {current}/{limit}）",
+  "@mirrorShareRewardMsg": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "current": { "type": "int" },
+      "limit": { "type": "int" }
+    }
+  },
+
+  "mirrorShareLimitReached": "本日の共有報酬はすでに受け取っています。",
+  "captureAreaNotFoundMsg": "キャプチャ範囲が見つかりません。",
+  "mirrorShareError": "画像共有中にエラーが発生しました。",
+  "mirrorServerError": "鏡の魔力が途切れました。(サーバーエラー)",
+  "mirrorNetworkError": "鏡が曇って何も見えません…（通信状況を確認してください）",
+
+  "rewardDialogTitle": "🎁 今日のボーナス",
+  "rewardDailyLimit": "今日のボーナスはすべて使いました 🍎",
+  "commonClose": "閉じる",
+  "rewardConfirmButton": "ボーナスを受け取る",
+
+  "rewardCooldown": "あと{minutes}分で再び受け取れます",
+  "@rewardCooldown": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+
+  "rewardNth": "今日は{n}回目のボーナスを受け取れます",
+  "@rewardNth": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+
+  "genieRemainText": "今日残っているジーニーの意見: {total}回（無料 {free}回）",
+  "@genieRemainText": {
+    "placeholders": {
+      "total": { "type": "int" },
+      "free": { "type": "int" }
+    }
+  },
+  "genieNoRemainMsg": "今日はここまで。明日また会いましょう！",
+  "genieUnlockAdBtn": "🪄 ジーニーの記憶を消す魔法（広告）",
+  "genieUnlockAdSuccessTitle": "魔法成功",
+  "genieUnlockAdSuccessMsg": "ジーニーの意見が2回追加されました",
+  "genieUnlockAdUsedMsg": "今日の魔法はすでに使用しました",
+  "geniePaidCostMsg": "追加の意見は1回につき 🍎 1個が差し引かれます。",
+  "genieRemainText": "ジーニーの意見 残り回数：{total}回（無料{free}回）",
+  "@genieRemainText": {
+    "placeholders": {
+      "total": { "type": "int" },
+      "free": { "type": "int" }
+    }
+  },
+  "genieMagicUnlockBtn": "🪄 ジーニーの記憶を消す魔法（広告）",
+  "genieMagicSuccessTitle": "魔法が成功しました",
+  "genieMagicSuccessMsg": "ジーニーの意見が2回追加されました。",
+
+  "genieLimitReachedMsg": "今日はここまでです。",
+  "genieUnlockHintMsg": "広告を見ると、追加で2回解放できます。",
+
+  "genieQuestionPrompt": "診断結果を参考に、鋭く現実的なアドバイスをください。要点だけ。"
 }

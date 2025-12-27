@@ -33,15 +33,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ⚠️ [중요] 실제 보상형 광고 ID로 교체하세요!
   final String rewardedId = Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/5224354917' // 안드로이드 테스트 ID
-      : 'ca-app-pub-9790456886445737/6552212239'; // iOS 테스트 ID
+      ? 'ca-app-pub-9790456886445737/1793891334'
+      : 'ca-app-pub-9790456886445737/6552212239';
 
   @override
   void initState() {
     super.initState();
-    _loadRewardedAd(); // 들어오자마자 광고 장전
-  }
 
+    if (_rewardedAd == null) {
+      _loadRewardedAd();
+    }
+  }
   @override
   void dispose() {
     _rewardedAd?.dispose();
@@ -49,26 +51,47 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // 보상형 광고 로드
+  // ✅ 보상형 광고 로드 (완성본)
   void _loadRewardedAd() {
     RewardedAd.load(
       adUnitId: rewardedId,
       request: const AdRequest(),
       rewardedAdLoadCallback: RewardedAdLoadCallback(
         onAdLoaded: (ad) {
-          if (mounted) {
-            setState(() {
-              _rewardedAd = ad;
-              _isRewardedLoaded = true;
-            });
+          if (!mounted) {
+            ad.dispose();
+            return;
           }
+
+          setState(() {
+            _rewardedAd = ad;
+            _isRewardedLoaded = true;
+          });
+
           ad.fullScreenContentCallback = FullScreenContentCallback(
             onAdDismissedFullScreenContent: (ad) {
               ad.dispose();
-              _loadRewardedAd(); // 리필
+
+              if (mounted) {
+                setState(() {
+                  _rewardedAd = null;
+                  _isRewardedLoaded = false;
+                });
+              }
+
+              _loadRewardedAd(); // ✅ 리필
             },
             onAdFailedToShowFullScreenContent: (ad, err) {
               ad.dispose();
-              _loadRewardedAd();
+
+              if (mounted) {
+                setState(() {
+                  _rewardedAd = null;
+                  _isRewardedLoaded = false;
+                });
+              }
+
+              _loadRewardedAd(); // ✅ 리필
             },
           );
         },
@@ -76,6 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
           print('메인 보상형광고 실패: ${err.message}');
           if (mounted) {
             setState(() {
+              _rewardedAd = null;
               _isRewardedLoaded = false;
             });
           }
@@ -84,15 +108,27 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+
   // 보상형 광고 보여주기
+  // ✅ 보상형 광고 show (완성본)
   void showRewarded() {
     final l10n = AppLocalizations.of(context)!;
 
+    // ✅ 혹시라도 다이얼로그 외에 호출될 경우 방어
+    if (!controller.canRewardNow()) return;
+
     if (_isRewardedLoaded && _rewardedAd != null) {
       setState(() => _isRewardedLoaded = false); // 잠금
-      _rewardedAd!.show(
+
+      // ✅ show는 1회성이라 미리 null 처리
+      final ad = _rewardedAd!;
+      _rewardedAd = null;
+
+      ad.show(
         onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
-          controller.addApple(3); // or Get.find<HomeController>().addApple(3);
+          controller.completeReward(); // ✅ 횟수/시간 기록
+          controller.addApple(5); // ✅ 사과 지급
+
           Get.snackbar(
             l10n.adRewardTitle,
             l10n.adRewardMsg,
@@ -109,8 +145,12 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
       );
+
+      // ✅ 혹시 로드가 끊겼으면 다시 로드 시도
+      _loadRewardedAd();
     }
   }
+
 
   // ================= UI 시작 =================
 
@@ -272,58 +312,77 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 🔥 [추가] 시크릿 선물 버튼 위젯
   Widget _buildSecretGiftButton(AppLocalizations l10n) {
-    return GestureDetector(
-      onTap: showRewarded,
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: const Color(0xFFE0E0E0)),
-          boxShadow: [
-            BoxShadow(
+    return Obx(() {
+      return GestureDetector(
+        onTap: () {
+          Get.find<HomeController>().showRewardDialog(
+            context,
+            l10n,
+            onConfirm: showRewarded,
+          );
+        },
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16.r),
+            border: Border.all(color: const Color(0xFFE0E0E0)),
+            boxShadow: [
+              BoxShadow(
                 color: Colors.black.withOpacity(0.02),
                 blurRadius: 10,
-                offset: const Offset(0, 4)),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(10.w),
-              decoration: const BoxDecoration(
-                color: subPoint,
-                shape: BoxShape.circle,
+                offset: const Offset(0, 4),
               ),
-              child: Text("🎁", style: TextStyle(fontSize: 22.sp)),
-            ),
-            SizedBox(width: 14.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l10n.adTitle,
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(10.w),
+                decoration: const BoxDecoration(
+                  color: subPoint,
+                  shape: BoxShape.circle,
+                ),
+                child: Text("🎁", style: TextStyle(fontSize: 22.sp)),
+              ),
+              SizedBox(width: 14.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.rewardDialogTitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.bold,
-                          color: textDark)),
-                  SizedBox(height: 2.h),
-                  Text(l10n.adDesc,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                        color: textDark,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      Get.find<HomeController>().canRewardNow()
+                          ? "선택 시 광고가 재생됩니다"
+                          : "잠시 후 다시 받을 수 있어요",
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                          fontSize: 12.sp, color: Colors.grey[600])),
-                ],
+                        fontSize: 12.sp,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Icon(Icons.play_circle_fill_rounded, color: mainPoint, size: 30.sp),
-          ],
+              Icon(Icons.play_circle_fill_rounded,
+                  color: mainPoint, size: 30.sp),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
+
   }
 
   Widget _buildMirrorCard(AppLocalizations l10n) {

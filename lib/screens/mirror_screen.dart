@@ -4,15 +4,93 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:rowan_mind_lab/controller/mirror_controller.dart';
 import 'package:rowan_mind_lab/l10n/app_localizations.dart';
+import 'package:rowan_mind_lab/service/mirror_ui_event.dart';
 
-class MirrorScreen extends StatelessWidget {
+class MirrorScreen extends StatefulWidget {
   const MirrorScreen({super.key});
+  @override
+  State<MirrorScreen> createState() => _MirrorScreenState();
+}
 
+class _MirrorScreenState extends State<MirrorScreen> {
+  late final MirrorController controller;
+  late final Worker _eventWorker;
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(MirrorController());
+    // 이벤트 리스닝
+    ever(controller.uiEvent, (MirrorUiEvent? e) {
+      if (e == null) return;
+      if (!mounted) return; // 안전장치
+      final l10n = AppLocalizations.of(context)!;
+
+      switch (e.type) {
+        case MirrorEventType.captureAreaNotFound:
+          Get.snackbar(l10n.errorTitle, l10n.captureAreaNotFoundMsg,
+              backgroundColor: Colors.white);
+          break;
+
+        case MirrorEventType.shareFailed:
+          Get.snackbar(l10n.errorTitle, l10n.shareErrorMessage,
+              backgroundColor: Colors.white);
+          break;
+
+        case MirrorEventType.shareRewarded:
+          Get.snackbar(
+            l10n.shareRewardTitle,
+            l10n.mirrorShareRewardMsg(
+              e.rewardApple ?? 0,
+              e.todayCount ?? 0,
+              e.dailyLimit ?? 0,
+            ),
+            backgroundColor: Colors.white,
+          );
+          break;
+
+        case MirrorEventType.notEnoughApples:
+          Get.dialog(
+            AlertDialog(
+              title: Text(l10n.notEnoughApplesTitle),
+              content: Text(
+                l10n.notEnoughApplesMsg2(
+                  e.costPerQuestion ?? 2,
+                  e.currentApple ?? 0,
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Get.back(),
+                  child: Text(l10n.btnCancel),
+                ),
+              ],
+            ),
+          );
+          break;
+
+        case MirrorEventType.serverError:
+          Get.snackbar(l10n.errorTitle, l10n.mirrorServerError,
+              backgroundColor: Colors.white);
+          break;
+
+        case MirrorEventType.networkError:
+          Get.snackbar(l10n.errorTitle, l10n.mirrorNetworkError,
+              backgroundColor: Colors.white);
+          break;
+      }
+
+      // 같은 이벤트 재발 방지(선택)
+      controller.uiEvent.value = null;
+    });
+  }
+  @override
+  void dispose() {
+    _eventWorker.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(MirrorController());
     final l10n = AppLocalizations.of(context)!;
-
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A2E),
       resizeToAvoidBottomInset: true,

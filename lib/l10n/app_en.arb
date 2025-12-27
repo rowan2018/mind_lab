@@ -20,34 +20,119 @@
   "mirrorHint": "Peek into the future with {count} apples.",
   "@mirrorHint": {
     "placeholders": {
-      "count": {
-        "type": "int"
-      }
+      "count": { "type": "int" }
     }
   },
 
   "resultPageTitle": "Test Result",
   "errorImage": "No Image",
   "btnShareReward": "Share & Get 🍎",
+
   "adTitle": "Need mysterious myrrh?",
-  "adDesc": "Watch ad to get Apple & Myrrh set",
+  "adDesc": "Watch an ad to get an Apple & Myrrh set",
+  "adLoadingTitle": "Hold on",
+  "adLoadingMsg": "Loading the ad. Please try again in a moment.",
+  "adRewardTitle": "Reward Received!",
+  "adRewardMsg": "You received 5 apples 🍎\nTalk more with the Genie.",
+
   "alertTitle": "Notice",
   "adUpdateMsg": "Ad feature coming soon!",
+
   "settingsTitle": "Settings",
   "settingsPushTitle": "Push Notifications",
   "settingsPushDesc": "Receive weekly quotes every Monday",
   "settingsVersion": "Current Version",
   "settingsAlarmOn": "Notifications enabled 🔔",
   "settingsAlarmOff": "Notifications disabled 🔕",
+
   "errorTitle": "Error",
   "errorLoadData": "Failed to load result data.",
+
   "shareRewardTitle": "Share Reward",
   "shareRewardMessage": "You shared with a friend and got 2 extra 🍎!",
-  "shareViralText": "This test gave me goosebumps! 😱 You should try it too! \n#PsychologyTest #RowanMindLab",
+  "shareViralText": "This test gave me goosebumps! 😱 You should try it too!\n#PsychologyTest #RowanMindLab",
   "shareErrorMessage": "Unable to share.",
-  "adRewardTitle": "Success!",
-  "adRewardMsg": "You earned a reward!",
-  "adLoadingTitle": "Hold on",
-  "adLoadingMsg": "Loading ad. Please try again in a moment.",
-  "share_answer": "Share this answer"
+  "share_answer": "Share this answer",
+
+  "genieOpinionBtn": "Hear Genie's opinion",
+  "genieOpinionTitle": "Genie's Insight",
+  "genieOpinionLoading": "Genie is looking deeper…",
+  "genieOpinionError": "Failed to load Genie's opinion.",
+
+  "notEnoughApplesTitle": "Not enough apples",
+  "notEnoughApplesMsg": "You need 🍎 1 to hear Genie's opinion.",
+
+  "btnCancel": "Cancel",
+
+  "notEnoughApplesMsg2": "To ask the Mystic Mirror,\nyou need {cost} golden apples.\n(Current: {current})",
+  "@notEnoughApplesMsg2": {
+    "placeholders": {
+      "cost": { "type": "int" },
+      "current": { "type": "int" }
+    }
+  },
+
+  "mirrorShareRewardTitle": "🍎 Reward Granted",
+  "mirrorShareRewardMsg": "Share reward +{count} (Today {current}/{limit})",
+  "@mirrorShareRewardMsg": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "current": { "type": "int" },
+      "limit": { "type": "int" }
+    }
+  },
+
+  "mirrorShareLimitReached": "You've already received today's share rewards.",
+  "captureAreaNotFoundMsg": "Couldn't find the capture area.",
+  "mirrorShareError": "An error occurred while sharing the image.",
+  "mirrorServerError": "The mirror's magic failed to connect. (Server error)",
+  "mirrorNetworkError": "The mirror is too foggy to see... (Check your internet connection)",
+
+  "rewardDialogTitle": "🎁 Today’s bonus",
+  "rewardDailyLimit": "You’ve used all bonuses for today 🍎",
+  "commonClose": "Close",
+  "rewardConfirmButton": "Get bonus",
+
+  "rewardCooldown": "Try again in {minutes} min",
+  "@rewardCooldown": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+
+  "rewardNth": "You can claim bonus #{n} today",
+  "@rewardNth": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+
+  "genieRemainText": "Genie opinions left today: {total} (Free {free})",
+  "@genieRemainText": {
+    "placeholders": {
+      "total": { "type": "int" },
+      "free": { "type": "int" }
+    }
+  },
+  "genieNoRemainMsg": "That’s it for today. Come back tomorrow!",
+  "genieUnlockAdBtn": "🪄 Memory-wipe spell (Ad)",
+  "genieUnlockAdSuccessTitle": "Spell Success",
+  "genieUnlockAdSuccessMsg": "You gained 2 extra Genie opinions",
+  "genieUnlockAdUsedMsg": "You’ve already used today’s spell",
+  "geniePaidCostMsg": "Extra opinions cost 🍎 1 each.",
+  "genieRemainText": "Remaining Genie opinions: {total} (Free {free})",
+  "@genieRemainText": {
+    "placeholders": {
+      "total": { "type": "int" },
+      "free": { "type": "int" }
+    }
+  },
+  "genieMagicUnlockBtn": "🪄 Unlock 2 more Genie opinions (Ad)",
+  "genieMagicSuccessTitle": "Genie unlocked!",
+  "genieMagicSuccessMsg": "You’ve got 2 extra Genie opinions.",
+
+  "genieLimitReachedMsg": "That’s all for today.",
+  "genieUnlockHintMsg": "Watch an ad to unlock 2 extra opinions.",
+
+  "genieQuestionPrompt": "Based on my test result, give sharp and realistic advice. Keep it concise."
 }

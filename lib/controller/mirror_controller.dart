@@ -2,14 +2,16 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:rowan_mind_lab/controller/home_controller.dart'; // import 추가
+import 'package:rowan_mind_lab/controller/home_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:crypto/crypto.dart';
+import 'package:rowan_mind_lab/service/mirror_ui_event.dart';
 
 class MirrorController extends GetxController {
   final TextEditingController textController = TextEditingController();
@@ -24,16 +26,18 @@ class MirrorController extends GetxController {
 
   final int costPerQuestion = 2;
   final bool isAdEnabled = false;
+  final uiEvent = Rxn<MirrorUiEvent>();
+
+  void _emit(MirrorUiEvent e) => uiEvent.value = e;
 
   Future<void> captureAndShare() async {
     try {
       RenderRepaintBoundary? boundary = captureKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
 
       if (boundary == null) {
-        print("캡처 영역을 찾을 수 없습니다.");
+        _emit(const MirrorUiEvent(MirrorEventType.captureAreaNotFound));
         return;
       }
-
       ui.Image image = await boundary.toImage(pixelRatio: 3.0);
       ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
 
@@ -50,9 +54,54 @@ class MirrorController extends GetxController {
       );
 
     } catch (e) {
-      print("캡처 에러 발생: $e");
-      Get.snackbar("오류", "이미지 공유 중 문제가 발생했습니다.", backgroundColor: Colors.white);
+      _emit(const MirrorUiEvent(MirrorEventType.shareFailed));
     }
+    String _hashText(String s) {
+      final bytes = utf8.encode(s);
+      return sha1.convert(bytes).toString();
+    }
+
+    String _todayKey() {
+      final now = DateTime.now();
+      return "${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}";
+    }
+
+    Future<void> _rewardAppleForShareIfEligible() async {
+      final text = answerText.value.trim();
+      if (text.isEmpty) return;
+
+      final prefs = await SharedPreferences.getInstance();
+
+      // ✅ 설정값 (원하는대로 조정)
+      const int rewardApple = 1;   // 공유 보상: +2 (너가 말한 “2개”)
+      const int dailyLimit = 3;    // 하루 최대 1번만 (무한 방지 강력)
+      // const int dailyLimit = 3; // 좀 느슨하게 하고 싶으면 3
+
+      final dayKey = _todayKey();
+      final dailyCountKey = "mirror_share_reward_count_$dayKey";
+      final dailyCount = prefs.getInt(dailyCountKey) ?? 0;
+
+      // 오늘 한도 초과면 지급 안 함
+      if (dailyCount >= dailyLimit) return;
+
+      // 같은 답변으로 중복 지급 방지
+      final answerHash = _hashText(text);
+      final rewardedAnswerKey = "mirror_share_rewarded_$answerHash";
+      if (prefs.getBool(rewardedAnswerKey) == true) return;
+
+      // ✅ 지급
+      homeController.appleCount.value += rewardApple;
+      await prefs.setBool(rewardedAnswerKey, true);
+      await prefs.setInt(dailyCountKey, dailyCount + 1);
+
+      _emit(MirrorUiEvent(
+        MirrorEventType.shareRewarded,
+        rewardApple: rewardApple,
+        todayCount: dailyCount + 1,
+        dailyLimit: dailyLimit,
+      ));
+    }
+    await _rewardAppleForShareIfEligible();
   }
 
   void askMirror() async {
@@ -61,26 +110,13 @@ class MirrorController extends GetxController {
 
     // 🍎 [수정] homeController.appleCount 사용
     if (homeController.appleCount.value < costPerQuestion) {
-      Get.dialog(
-        AlertDialog(
-          title: const Text("🍎 사과가 부족해요"),
-          content: Obx(() => Text("신비한 거울에게 질문하려면\n황금 사과 $costPerQuestion개가 필요합니다.\n(현재: ${homeController.appleCount.value}개)")),
-          actions: [
-            TextButton(
-              onPressed: () => Get.back(),
-              child: const Text("취소"),
-            ),
-            if (isAdEnabled)
-              ElevatedButton(
-                onPressed: () {
-                  Get.back();
-                },
-                child: const Text("광고 보고 충전"),
-              ),
-          ],
-        ),
-      );
+      _emit(MirrorUiEvent(
+        MirrorEventType.notEnoughApples,
+        costPerQuestion: costPerQuestion,
+        currentApple: homeController.appleCount.value,
+      ));
       return;
+
     }
 
     // 🍎 [수정] 차감도 homeController에서
@@ -111,12 +147,11 @@ class MirrorController extends GetxController {
             .replaceAll('"', '')
             .trim();
       } else {
-        answerText.value = "거울의 마력이 부족하여 연결되지 않았습니다. (서버 에러)";
+        _emit(const MirrorUiEvent(MirrorEventType.serverError));
       }
 
     } catch (e) {
-      answerText.value = "거울이 흐려져 아무것도 보이지 않습니다... (인터넷 연결 확인)";
-      print("통신 실패: $e");
+      _emit(const MirrorUiEvent(MirrorEventType.networkError));
     } finally {
       isLoading.value = false;
       textController.clear();

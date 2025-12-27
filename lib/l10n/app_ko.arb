@@ -18,30 +18,118 @@
   "mirrorLoading": "우주의 기운을\n모으는 중...",
   "mirrorGuide": "그대의 마음속\n이야기를 들려주게.",
   "mirrorHint": "사과 {count}개로 미래를 엿보거라.",
+  "@mirrorHint": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
 
   "resultPageTitle": "테스트 결과",
   "errorImage": "이미지 없음",
   "btnShareReward": "공유하고 🍎받기",
+
   "adTitle": "신비한 몰약이 필요하신가요?",
   "adDesc": "광고 보고 사과&몰약 세트 받기",
-  "alertTitle": "알림",
-  "adUpdateMsg": "곧 광고 기능이 업데이트됩니다!",
+  "adLoadingTitle": "잠시만요",
+  "adLoadingMsg": "광고를 불러오는 중입니다. 잠시 후 다시 시도해주세요.",
+  "adRewardTitle": "보상 획득!",
+  "adRewardMsg": "사과 5개를 받았습니다 🍎\n지니와 더 이야기해 보세요.",
+
   "settingsTitle": "설정",
   "settingsPushTitle": "푸시 알림",
   "settingsPushDesc": "매주 월요일 아침, 명언 알림을 받습니다",
   "settingsVersion": "현재 버전",
   "settingsAlarmOn": "알림이 켜졌습니다 🔔",
   "settingsAlarmOff": "알림이 꺼졌습니다 🔕",
+
   "errorTitle": "오류",
   "errorLoadData": "결과 데이터를 불러오지 못했습니다.",
+
   "shareRewardTitle": "공유 보상",
   "shareRewardMessage": "친구에게 공유하고 🍎 2개를 추가로 받았습니다!",
-  "shareViralText": "이 테스트 완전 소름돋아! 😱 너도 한번 해봐! \n#심리테스트 #로완마인드랩",
+  "shareViralText": "이 테스트 완전 소름돋아! 😱 너도 한번 해봐!\n#심리테스트 #로완마인드랩",
   "shareErrorMessage": "공유하기를 실행할 수 없습니다.",
-  "adRewardTitle": "성공!",
-  "adRewardMsg": "보상을 획득했습니다!",
-  "adLoadingTitle": "잠시만요",
-  "adLoadingMsg": "광고를 불러오는 중입니다. 잠시 후 다시 시도해주세요.",
-  "share_answer": "이 답변 공유하기"
+  "share_answer": "이 답변 공유하기",
 
+  "genieOpinionBtn": "지니 의견 듣기",
+  "genieOpinionTitle": "지니의 한 마디",
+  "genieOpinionLoading": "지니가 더 깊이 보고 있어요…",
+  "genieOpinionError": "지니 의견을 불러오지 못했어요.",
+
+  "notEnoughApplesTitle": "사과가 부족해",
+  "notEnoughApplesMsg": "지니 의견을 보려면 🍎 1개가 필요해.",
+
+  "btnCancel": "취소",
+
+  "notEnoughApplesMsg2": "신비한 거울에게 질문하려면\n황금 사과 {cost}개가 필요합니다.\n(현재: {current}개)",
+  "@notEnoughApplesMsg2": {
+    "placeholders": {
+      "cost": { "type": "int" },
+      "current": { "type": "int" }
+    }
+  },
+
+  "mirrorShareRewardTitle": "🍎 보상 지급",
+  "mirrorShareRewardMsg": "공유 보상 +{count} (오늘 {current}/{limit})",
+  "@mirrorShareRewardMsg": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "current": { "type": "int" },
+      "limit": { "type": "int" }
+    }
+  },
+
+  "mirrorShareLimitReached": "오늘 받을 수 있는 공유 보상은 다 받았어요.",
+  "captureAreaNotFoundMsg": "캡처 영역을 찾을 수 없습니다.",
+  "mirrorShareError": "이미지 공유 중 문제가 발생했습니다.",
+  "mirrorServerError": "거울의 마력이 부족하여 연결되지 않았습니다. (서버 오류)",
+  "mirrorNetworkError": "거울이 흐려져 아무것도 보이지 않습니다... (인터넷 연결 확인)",
+
+  "rewardDialogTitle": "🎁 오늘의 보너스",
+  "rewardDailyLimit": "오늘의 보너스는 모두 사용했어요 🍎",
+  "commonClose": "닫기",
+  "rewardConfirmButton": "보너스 받기",
+
+  "rewardCooldown": "{minutes}분 후에 다시 받을 수 있어요",
+  "@rewardCooldown": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+
+  "rewardNth": "오늘 {n}번째 보너스를 받을 수 있어요",
+  "@rewardNth": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+
+  "genieRemainText": "오늘 남은 지니 의견: {total}회 (무료 {free}회)",
+  "@genieRemainText": {
+    "placeholders": {
+      "total": { "type": "int" },
+      "free": { "type": "int" }
+    }
+  },
+  "genieNoRemainMsg": "오늘은 여기까지예요. 내일 다시 만나요!",
+  "genieUnlockAdBtn": "🪄 지니의 기억을 지우는 마법 (광고)",
+  "genieUnlockAdSuccessTitle": "마법 성공",
+  "genieUnlockAdSuccessMsg": "지니 의견 2회가 추가되었어요",
+  "genieUnlockAdUsedMsg": "오늘의 마법은 이미 사용했어요",
+  "geniePaidCostMsg": "추가 의견 1회당 🍎 1개가 차감됩니다.",
+   "genieRemainText": "지니의견 남은 횟수: {total}회 (무료 {free}회)",
+    "@genieRemainText": {
+      "placeholders": {
+        "total": { "type": "int" },
+        "free": { "type": "int" }
+      }
+    },
+    "genieMagicUnlockBtn": "🪄 지니의 기억을 지우는 마법 (광고)",
+  "genieMagicSuccessTitle": "지니의 마법 성공",
+  "genieMagicSuccessMsg": "지니의견 2회가 추가되었어요",
+
+  "genieLimitReachedMsg": "오늘은 여기까지예요",
+  "genieUnlockHintMsg": "마법(광고)으로 추가 2회를 열 수 있어요",
+
+  "genieQuestionPrompt": "심리테스트 결과를 참고해서, 날카롭고 현실적인 조언을 해줘. 핵심만."
 }

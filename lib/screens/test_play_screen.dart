@@ -81,44 +81,11 @@ class _TestPlayScreenState extends State<TestPlayScreen> {
   }
 
   void _onOptionSelected(int score) {
-    final isLastQuestion = controller.currentQuestionIndex.value ==
-        controller.testItem.questions.length - 1;
+    controller.selectOption(score);
 
-    if (!isLastQuestion) {
-      controller.selectOption(score);
-      return;
-    }
-
-    // 마지막 문제면 광고 우선 시도
-    final ad = _interstitialAd;
-    if (_isAdLoaded && ad != null) {
-      // 중복 show 방지: show 직전에 상태 내려버림
-      _isAdLoaded = false;
-      _interstitialAd = null;
-
-      // 광고 닫힌 뒤 결과로 보내기
-      // (광고가 안 떠도 아래 onAdFailedToShow에서 selectOption 호출)
-      ad.fullScreenContentCallback = FullScreenContentCallback(
-        onAdDismissedFullScreenContent: (ad) {
-          ad.dispose();
-          controller.selectOption(score);
-          _loadInterstitialAd();
-        },
-        onAdFailedToShowFullScreenContent: (ad, err) {
-          ad.dispose();
-          controller.selectOption(score);
-          _loadInterstitialAd();
-        },
-      );
-
-      ad.show();
-    } else {
-      // 광고 없으면 그냥 결과
-      controller.selectOption(score);
-
-      // (선택) 마지막문제 도달했는데 광고가 없었다면 다시 로드 시도
-      if (!_isAdLoaded) _loadInterstitialAd();
-    }
+    // 광고는 여기서 절대 show() 하지 않음.
+    // (원하면 로드만 유지해서 ResultScreen에서 쓰거나,
+    //  그냥 ResultScreen에서 따로 로드해도 됨)
   }
 
 
