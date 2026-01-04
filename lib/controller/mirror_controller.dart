@@ -17,18 +17,29 @@ class MirrorController extends GetxController {
   final TextEditingController textController = TextEditingController();
   final GlobalKey captureKey = GlobalKey();
 
-  // 🍎 [핵심 수정] 내 변수가 아니라 HomeController의 변수를 빌려옴
-  // 이제 화면이 꺼져도 이 값은 HomeController에 안전하게 살아있음
+  // 🍎 HomeController 연결
   HomeController get homeController => Get.find<HomeController>();
 
   var isLoading = false.obs;
   var answerText = "".obs;
 
   final int costPerQuestion = 2;
-  final bool isAdEnabled = false;
   final uiEvent = Rxn<MirrorUiEvent>();
 
   void _emit(MirrorUiEvent e) => uiEvent.value = e;
+
+  // 🔥 [수정 1] 들어올 때마다 상태 초기화 (서지연님 피드백 반영)
+  @override
+  void onInit() {
+    super.onInit();
+    resetState();
+  }
+
+  void resetState() {
+    answerText.value = "";
+    textController.clear();
+    isLoading.value = false;
+  }
 
   Future<void> captureAndShare() async {
     try {
@@ -48,67 +59,67 @@ class MirrorController extends GetxController {
       final File imgFile = File('${directory.path}/genie_mirror_result.png');
       await imgFile.writeAsBytes(pngBytes);
 
+      // 공유 실행
       await Share.shareXFiles(
         [XFile(imgFile.path)],
         text: "[지니의 램프] 내 욕망을 꿰뚫어 본 지니의 답변...🔮\n#지니의램프 #팩폭 #소원",
       );
 
+      // 공유 성공 시 보상 지급 로직 실행
+      await _rewardAppleForShareIfEligible();
+
     } catch (e) {
       _emit(const MirrorUiEvent(MirrorEventType.shareFailed));
     }
-    String _hashText(String s) {
-      final bytes = utf8.encode(s);
-      return sha1.convert(bytes).toString();
-    }
+  }
 
-    String _todayKey() {
-      final now = DateTime.now();
-      return "${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}";
-    }
+  // 내부 헬퍼 함수들 (보기 좋게 밖으로 뺌)
+  String _hashText(String s) {
+    final bytes = utf8.encode(s);
+    return sha1.convert(bytes).toString();
+  }
 
-    Future<void> _rewardAppleForShareIfEligible() async {
-      final text = answerText.value.trim();
-      if (text.isEmpty) return;
+  String _todayKey() {
+    final now = DateTime.now();
+    return "${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}";
+  }
 
-      final prefs = await SharedPreferences.getInstance();
+  Future<void> _rewardAppleForShareIfEligible() async {
+    final text = answerText.value.trim();
+    if (text.isEmpty) return;
 
-      // ✅ 설정값 (원하는대로 조정)
-      const int rewardApple = 1;   // 공유 보상: +2 (너가 말한 “2개”)
-      const int dailyLimit = 3;    // 하루 최대 1번만 (무한 방지 강력)
-      // const int dailyLimit = 3; // 좀 느슨하게 하고 싶으면 3
+    final prefs = await SharedPreferences.getInstance();
+    const int rewardApple = 1;
+    const int dailyLimit = 3;
 
-      final dayKey = _todayKey();
-      final dailyCountKey = "mirror_share_reward_count_$dayKey";
-      final dailyCount = prefs.getInt(dailyCountKey) ?? 0;
+    final dayKey = _todayKey();
+    final dailyCountKey = "mirror_share_reward_count_$dayKey";
+    final dailyCount = prefs.getInt(dailyCountKey) ?? 0;
 
-      // 오늘 한도 초과면 지급 안 함
-      if (dailyCount >= dailyLimit) return;
+    if (dailyCount >= dailyLimit) return;
 
-      // 같은 답변으로 중복 지급 방지
-      final answerHash = _hashText(text);
-      final rewardedAnswerKey = "mirror_share_rewarded_$answerHash";
-      if (prefs.getBool(rewardedAnswerKey) == true) return;
+    final answerHash = _hashText(text);
+    final rewardedAnswerKey = "mirror_share_rewarded_$answerHash";
+    if (prefs.getBool(rewardedAnswerKey) == true) return;
 
-      // ✅ 지급
-      homeController.appleCount.value += rewardApple;
-      await prefs.setBool(rewardedAnswerKey, true);
-      await prefs.setInt(dailyCountKey, dailyCount + 1);
+    // ✅ 지급
+    homeController.appleCount.value += rewardApple;
+    await prefs.setBool(rewardedAnswerKey, true);
+    await prefs.setInt(dailyCountKey, dailyCount + 1);
 
-      _emit(MirrorUiEvent(
-        MirrorEventType.shareRewarded,
-        rewardApple: rewardApple,
-        todayCount: dailyCount + 1,
-        dailyLimit: dailyLimit,
-      ));
-    }
-    await _rewardAppleForShareIfEligible();
+    _emit(MirrorUiEvent(
+      MirrorEventType.shareRewarded,
+      rewardApple: rewardApple,
+      todayCount: dailyCount + 1,
+      dailyLimit: dailyLimit,
+    ));
   }
 
   void askMirror() async {
     String question = textController.text.trim();
     if (question.isEmpty) return;
 
-    // 🍎 [수정] homeController.appleCount 사용
+    // 사과 부족 체크
     if (homeController.appleCount.value < costPerQuestion) {
       _emit(MirrorUiEvent(
         MirrorEventType.notEnoughApples,
@@ -116,10 +127,9 @@ class MirrorController extends GetxController {
         currentApple: homeController.appleCount.value,
       ));
       return;
-
     }
 
-    // 🍎 [수정] 차감도 homeController에서
+    // 🍎 사과 선차감
     homeController.appleCount.value -= costPerQuestion;
 
     isLoading.value = true;
@@ -127,6 +137,7 @@ class MirrorController extends GetxController {
     FocusManager.instance.primaryFocus?.unfocus();
 
     try {
+      // ⚠️ 실제 사용중인 서버 주소인지 확인 필수
       final url = Uri.parse('http://www.rowanzone.co.kr:3000/ask-mirror');
 
       final response = await http.post(
@@ -147,10 +158,14 @@ class MirrorController extends GetxController {
             .replaceAll('"', '')
             .trim();
       } else {
+        // 🔥 [수정 2] 서버 에러 시 사과 환불
+        homeController.appleCount.value += costPerQuestion;
         _emit(const MirrorUiEvent(MirrorEventType.serverError));
       }
 
     } catch (e) {
+      // 🔥 [수정 2] 네트워크 에러 시 사과 환불
+      homeController.appleCount.value += costPerQuestion;
       _emit(const MirrorUiEvent(MirrorEventType.networkError));
     } finally {
       isLoading.value = false;

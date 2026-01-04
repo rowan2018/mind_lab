@@ -14,7 +14,7 @@ class MirrorScreen extends StatefulWidget {
 
 class _MirrorScreenState extends State<MirrorScreen> {
   late final MirrorController controller;
-  late final Worker _eventWorker;
+  Worker? _eventWorker;
   @override
   void initState() {
     super.initState();
@@ -85,7 +85,7 @@ class _MirrorScreenState extends State<MirrorScreen> {
   }
   @override
   void dispose() {
-    _eventWorker.dispose();
+    _eventWorker?.dispose();
     super.dispose();
   }
   @override

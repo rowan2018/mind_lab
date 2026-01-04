@@ -8,6 +8,7 @@ import 'package:rowan_mind_lab/screens/mirror_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart'; // 광고 패키지
 import 'dart:io';
+import 'package:rowan_mind_lab/data/models.dart';
 
 // 광고 로딩을 위해 StatefulWidget으로 변경
 class HomeScreen extends StatefulWidget {
@@ -186,8 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(
-              child: CircularProgressIndicator(color: mainPoint));
+          return const Center(child: CircularProgressIndicator(color: mainPoint));
         }
         return SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
@@ -195,118 +195,65 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(height: 10.h),
+              _buildDailyCard(), // 오늘의 명언
 
-              // TODAY 섹션
+              SizedBox(height: 28.h), // 명언과 테스트 사이 여백
+                // 🔥 주력 테스트가 로드되었다면 크게 보여주기
               Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
                 children: [
-                  Text("TODAY",
-                      style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.bold,
-                          color: mainPoint)),
+                  Text("TEST", style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: mainPoint)),
                   SizedBox(width: 8.w),
-                  Expanded(
-                    child: Text(
-                      l10n.homeDailyTitle,
-                      style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                          color: textDark),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
+                  Expanded(child: Text(l10n.homeTestTitle, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: textDark))),
                 ],
               ),
-              SizedBox(height: 12.h),
-              _buildDailyCard(),
+              SizedBox(height: 10.h),
+              Obx(() {
+                if (controller.primaryTest.value != null) {
+                  return Column(
+                    children: [
+                      _buildPrimaryTestItem(controller.primaryTest.value!, l10n),
+                      SizedBox(height: 20.h),
+                    ],
+                  );
+                }
+                return const SizedBox.shrink();
+              }),
+              // 1. TEST 섹션 (최상단 유지)
 
-              SizedBox(height: 20.h),
-
-              // 🔥 [추가] 시크릿 선물 버튼 (명언 아래에 배치)
-              _buildSecretGiftButton(l10n),
-
-              SizedBox(height: 30.h),
-
-              // SECRET 섹션
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Text("SECRET",
-                      style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF6A00FF))),
-                  SizedBox(width: 8.w),
-                  Expanded(
-                    child: Text(
-                      l10n.secretTitle,
-                      style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                          color: textDark),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16.h),
-              _buildMirrorCard(l10n),
-
-              SizedBox(height: 30.h),
-
-              // TEST 섹션
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Text("TEST",
-                      style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.bold,
-                          color: mainPoint)),
-                  SizedBox(width: 8.w),
-                  Expanded(
-                    child: Text(
-                      l10n.homeTestTitle,
-                      style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                          color: textDark),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16.h),
-
+              SizedBox(height: 0.h),
               ListView.separated(
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 itemCount: controller.testList.length,
                 separatorBuilder: (_, __) => SizedBox(height: 16.h),
                 itemBuilder: (context, index) {
-                  final test = controller.testList[index];
-                  return _buildTestItem(test, l10n);
+                  return _buildTestItem(controller.testList[index], l10n);
                 },
               ),
-              SizedBox(height: 50.h),
+
+              SizedBox(height: 10.h), // 테스트와 상담소 사이 여백
+
+              // 2. SECRET 섹션 (지니 상담소)
+              Row(
+                children: [
+                  Text("SECRET", style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: const Color(0xFF6A00FF))),
+                  SizedBox(width: 8.w),
+                  Expanded(child: Text(l10n.secretTitle, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: textDark))),
+                ],
+              ),
+              SizedBox(height: 16.h),
+              _buildMirrorCard(l10n), // 상담소 카드
+
+              SizedBox(height: 40.h), // 상담소와 광고 배너 사이 여백
+
+              // 3. 🔥 광고 배너 (최하단 배치)
+              _buildSecretGiftButton(l10n),
+
+              SizedBox(height: 60.h), // 맨 밑 여유 공간
             ],
           ),
         );
       }),
-      bottomNavigationBar: Container(
-        height: 40.h,
-        color: Colors.white,
-        alignment: Alignment.center,
-        child: Text(" ",
-            style: TextStyle(color: Colors.grey[300], fontSize: 12.sp)),
-      ),
     );
   }
 
@@ -362,9 +309,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      Get.find<HomeController>().canRewardNow()
-                          ? "선택 시 광고가 재생됩니다"
-                          : "잠시 후 다시 받을 수 있어요",
+                      controller.canRewardNow()
+                          ? l10n.bonusAdPlaysOnSelect
+                          : l10n.bonusComeBackLater,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -372,6 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: Colors.grey[600],
                       ),
                     ),
+
                   ],
                 ),
               ),
@@ -387,108 +335,58 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildMirrorCard(AppLocalizations l10n) {
     return GestureDetector(
-      onTap: () {
-        Get.to(() => const MirrorScreen());
-      },
+      onTap: () { Get.to(() => const MirrorScreen()); },
       child: Container(
-        height: 120.h,
+        height: 96.h, // 기존 120.h에서 80%인 96.h로 축소
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [Color(0xFF2E1A47), Color(0xFF6A00FF)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(24.r),
+          borderRadius: BorderRadius.circular(20.r), // 높이에 맞춰 라운드 소폭 조정
           boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF6A00FF).withOpacity(0.4),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
-            ),
+            BoxShadow(color: const Color(0xFF6A00FF).withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 6)),
           ],
         ),
         child: Stack(
           children: [
             Positioned(
-              right: -10.w,
-              bottom: -10.h,
-              child: Icon(
-                Icons.auto_awesome,
-                size: 100.sp,
-                color: Colors.white.withOpacity(0.1),
-              ),
+              right: -5.w,
+              bottom: -5.h,
+              child: Icon(Icons.auto_awesome, size: 70.sp, color: Colors.white.withOpacity(0.1)), // 아이콘 크기 조정
             ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+              padding: EdgeInsets.symmetric(horizontal: 20.w), // 상하 패딩은 제거하여 중앙 정렬 유도
               child: Row(
                 children: [
                   Container(
-                    width: 50.w,
-                    height: 50.w,
+                    width: 42.w, // 아이콘 영역 소폭 축소
+                    height: 42.w,
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white38),
                     ),
-                    child: const Icon(Icons.auto_fix_high, color: Colors.white),
+                    child: Icon(Icons.auto_fix_high, color: Colors.white, size: 20.sp),
                   ),
-                  SizedBox(width: 16.w),
+                  SizedBox(width: 14.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center, // 중앙 정렬
                       children: [
-                        Text(
-                          l10n.secretTitle,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          l10n.secretDesc,
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            color: Colors.white70,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        Text(l10n.secretTitle, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: Colors.white)),
+                        SizedBox(height: 2.h),
+                        Text(l10n.secretDesc, style: TextStyle(fontSize: 12.sp, color: Colors.white70), maxLines: 1, overflow: TextOverflow.ellipsis),
                       ],
                     ),
                   ),
+                  // 입장 버튼 사이즈도 높이에 맞춰 컴팩트하게 조정
                   Container(
-                    padding:
-                    EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-                    decoration: BoxDecoration(
-                        color: const Color(0xFFFFD700),
-                        borderRadius: BorderRadius.circular(20.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 4,
-                            offset: const Offset(1, 2),
-                          )
-                        ]),
-                    child: Row(
-                      children: [
-                        Text(
-                          l10n.btnEnter,
-                          style: TextStyle(
-                            color: const Color(0xFF2E1A47),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12.sp,
-                          ),
-                        ),
-                        SizedBox(width: 4.w),
-                        Icon(Icons.arrow_forward_rounded,
-                            size: 14.sp, color: const Color(0xFF2E1A47)),
-                      ],
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                    decoration: BoxDecoration(color: const Color(0xFFFFD700), borderRadius: BorderRadius.circular(18.r)),
+                    child: Icon(Icons.arrow_forward_rounded, size: 16.sp, color: const Color(0xFF2E1A47)),
                   ),
                 ],
               ),
@@ -499,51 +397,32 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // 🔥 [높이 50% 축소] 명언 카드
   Widget _buildDailyCard() {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 24.w),
+      padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 20.w), // 상하 패딩 대폭 축소
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24.r),
-        border: Border.all(color: borderLine, width: 1.5),
+        borderRadius: BorderRadius.circular(20.r), // 라운드 값 조정
+        border: Border.all(color: borderLine, width: 1.2),
         boxShadow: [
-          BoxShadow(
-            color: mainPoint.withOpacity(0.15),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
+          BoxShadow(color: mainPoint.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4)),
         ],
       ),
       child: Column(
         children: [
-          Icon(Icons.format_quote_rounded,
-              size: 36.sp, color: mainPoint.withOpacity(0.3)),
-          SizedBox(height: 12.h),
+          // 따옴표 아이콘 크기 축소
+          Icon(Icons.format_quote_rounded, size: 24.sp, color: mainPoint.withOpacity(0.3)),
+          SizedBox(height: 8.h),
           Text(
             controller.todayQuote.value.content,
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w500,
-              height: 1.6,
-              color: textDark,
-            ),
+            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, height: 1.4, color: textDark),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 20.h),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-            decoration: BoxDecoration(
-              color: subPoint,
-              borderRadius: BorderRadius.circular(20.r),
-            ),
-            child: Text(
-              "- ${controller.todayQuote.value.author} -",
-              style: TextStyle(
-                fontSize: 13.sp,
-                color: mainPoint,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+          SizedBox(height: 12.h),
+          Text(
+            "- ${controller.todayQuote.value.author} -",
+            style: TextStyle(fontSize: 11.sp, color: mainPoint, fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -638,6 +517,52 @@ class _HomeScreenState extends State<HomeScreen> {
                   fontWeight: FontWeight.bold,
                   fontSize: 12.sp,
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  // 🔥 주력 테스트를 크게 보여주는 위젯 함수 추가
+  Widget _buildPrimaryTestItem(TestItem test, AppLocalizations l10n) {
+    return GestureDetector(
+      onTap: () => Get.toNamed(Routes.TEST, arguments: test),
+      child: Container(
+        margin: EdgeInsets.only(bottom: 10.h), // 10.h 여백 적용
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24.r),
+          border: Border.all(color: Color(0xFFFFCDD2), width: 1.5), // borderLine 색상
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 썸네일 크게 (상단 라운드 처리)
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(22.r)),
+              child: Image.network(
+                test.thumbnailUrl,
+                height: 120.h, // 2배 정도 키운 높이
+                fit: BoxFit.cover,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    test.title,
+                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Color(0xFF5D4037)),
+                  ),
+                  SizedBox(height: 8.h),
+                  // 설명문 전체 노출 (maxLines 제한 없음)
+                  Text(
+                    test.description,
+                    style: TextStyle(fontSize: 14.sp, color: Color(0xFF5D4037).withOpacity(0.7), height: 1.4),
+                  ),
+                ],
               ),
             ),
           ],

@@ -85,7 +85,9 @@
   "mirrorServerError": "거울의 마력이 부족하여 연결되지 않았습니다. (서버 오류)",
   "mirrorNetworkError": "거울이 흐려져 아무것도 보이지 않습니다... (인터넷 연결 확인)",
 
-  "rewardDialogTitle": "🎁 오늘의 보너스",
+  "rewardDialogTitle": "🎁 지니의 작은 선물",
+  "bonusAdPlaysOnSelect": "짧은 광고 시청 후 사과가 지급돼요",
+  "bonusComeBackLater": "잠시 후 다시 받을 수 있어요",
   "rewardDailyLimit": "오늘의 보너스는 모두 사용했어요 🍎",
   "commonClose": "닫기",
   "rewardConfirmButton": "보너스 받기",

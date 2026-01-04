@@ -87,8 +87,9 @@
   "mirrorShareError": "An error occurred while sharing the image.",
   "mirrorServerError": "The mirror's magic failed to connect. (Server error)",
   "mirrorNetworkError": "The mirror is too foggy to see... (Check your internet connection)",
-
-  "rewardDialogTitle": "🎁 Today’s bonus",
+  "rewardDialogTitle": "🎁 A Small Gift from Genie",
+  "bonusAdPlaysOnSelect": "Watch a short ad to receive apples",
+  "bonusComeBackLater": "You can claim it again later",
   "rewardDailyLimit": "You’ve used all bonuses for today 🍎",
   "commonClose": "Close",
   "rewardConfirmButton": "Get bonus",

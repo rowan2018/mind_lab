@@ -88,7 +88,9 @@
   "mirrorServerError": "鏡の魔力が途切れました。(サーバーエラー)",
   "mirrorNetworkError": "鏡が曇って何も見えません…（通信状況を確認してください）",
 
-  "rewardDialogTitle": "🎁 今日のボーナス",
+  "rewardDialogTitle": "🎁 ジニーの小さな贈り物",
+  "bonusAdPlaysOnSelect": "短い広告を視聴すると、リンゴがもらえます",
+  "bonusComeBackLater": "しばらくしてからもう一度受け取れます",
   "rewardDailyLimit": "今日のボーナスはすべて使いました 🍎",
   "commonClose": "閉じる",
   "rewardConfirmButton": "ボーナスを受け取る",

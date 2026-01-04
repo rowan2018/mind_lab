@@ -5,8 +5,8 @@ import 'package:get/get.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:rowan_mind_lab/l10n/app_localizations.dart';// [필수] 다국어 임포트
-
+import 'package:shared_preferences/shared_preferences.dart'; // 💾 저장소 추가
+import 'package:rowan_mind_lab/l10n/app_localizations.dart';
 import 'package:rowan_mind_lab/data/models.dart';
 import 'package:rowan_mind_lab/routers/routers.dart';
 import 'package:rowan_mind_lab/controller/home_controller.dart';
@@ -15,11 +15,7 @@ class ResultController extends GetxController {
   final ScreenshotController screenshotController = ScreenshotController();
 
   late TestResult result;
-
   bool hasResultRewardGiven = false;
-  bool hasShareRewardGiven = false;
-
-
 
   @override
   void onInit() {
@@ -31,51 +27,57 @@ class ResultController extends GetxController {
     if (Get.arguments != null && Get.arguments is TestResult) {
       result = Get.arguments as TestResult;
     } else {
-      // [수정] 한글 하드코딩 제거 -> loc 변수 사용
       result = TestResult(
         minScore: 0,
         maxScore: 0,
-        resultTitleKo: loc.errorTitle, // "결과 오류" 대체
-        resultTitleEn: "Error",        // 영어는 그대로 둠
-        resultTitleJp: "エラー",         // 일본어는 그대로 둠
-        resultDescKo: loc.errorLoadData, // "데이터 못 불러옴" 대체
+        resultTitleKo: loc.errorTitle,
+        resultTitleEn: "Error",
+        resultTitleJp: "エラー",
+        resultDescKo: loc.errorLoadData,
         resultDescEn: "Failed to load result.",
         resultDescJp: "結果を読み込めませんでした。",
         imgUrl: "",
       );
     }
 
-    // 결과 화면 진입 보상
+    // 결과 화면 진입 보상 (혹시 필요하면 사용)
     _giveResultReward();
   }
 
-  // 🎁 1. 결과 확인 보상
   void _giveResultReward() {
     if (hasResultRewardGiven) return;
-
     if (Get.isRegistered<HomeController>()) {
-      final homeController = Get.find<HomeController>();
-
+      // 단순 진입 보상은 일단 패스 (필요하면 addApple 추가)
       hasResultRewardGiven = true;
     }
   }
 
-  // 🎁 2. 공유 보상
-  void _giveShareReward() {
-    if (hasShareRewardGiven) return;
-
-    // [중요] 다국어 객체 가져오기
+  // 🎁 [수정 1] 공유 보상 로직 (하루 3회 제한 + 사과 지급)
+  Future<void> _giveShareReward() async {
     final loc = AppLocalizations.of(Get.context!)!;
+    final prefs = await SharedPreferences.getInstance();
 
+    // 오늘 날짜 키 생성 (예: 2023-12-28)
+    final todayKey = DateTime.now().toString().substring(0, 10);
+    final countKey = "share_reward_count_$todayKey";
+
+    // 현재 횟수 가져오기
+    int currentCount = prefs.getInt(countKey) ?? 0;
+
+    // 🛑 하루 3회 넘었으면 중단
+    if (currentCount >= 3) return;
+
+    // 🍎 사과 지급
     if (Get.isRegistered<HomeController>()) {
-      final homeController = Get.find<HomeController>();
+      Get.find<HomeController>().addApple(2); // 사과 2개 추가
 
-      hasShareRewardGiven = true;
+      // 횟수 저장
+      await prefs.setInt(countKey, currentCount + 1);
 
-      // [수정] 스낵바 한글 제거
+      // 보상 알림
       Get.snackbar(
           loc.shareRewardTitle,   // "공유 보상"
-          loc.shareRewardMessage, // "사과 2개 획득..."
+          loc.shareRewardMessage, // "사과를 획득했어요!"
           backgroundColor: Colors.white,
           snackPosition: SnackPosition.BOTTOM
       );
@@ -87,7 +89,6 @@ class ResultController extends GetxController {
   }
 
   Future<void> shareResultImage() async {
-    // [중요] 다국어 객체 가져오기
     final loc = AppLocalizations.of(Get.context!)!;
 
     try {
@@ -98,20 +99,25 @@ class ResultController extends GetxController {
       final imagePath = await File('${directory.path}/result_share.png').create();
       await imagePath.writeAsBytes(imageBytes);
 
-      // [수정] 공유 멘트 한글 제거
+      // 🔗 [수정 2] 다운로드 링크 추가
+      String appLink = Platform.isAndroid
+          ? "https://play.google.com/store/apps/details?id=com.rowan.mindlab"
+          : "https://apps.apple.com/app/id6739346543";
+
       await Share.shareXFiles(
           [XFile(imagePath.path)],
-          text: loc.shareViralText // "소름 돋아!..." 멘트
+          // 멘트 + 줄바꿈 + 링크 조합
+          text: "${loc.shareViralText}\n\n$appLink"
       );
 
-      _giveShareReward();
+      // 공유 끝나면 보상 지급 체크
+      await _giveShareReward();
 
     } catch (e) {
       print("Share Error: $e");
-      // [수정] 에러 메시지 한글 제거
       Get.snackbar(
-          loc.errorTitle,     // "오류"
-          loc.shareErrorMessage, // "공유 실패..."
+          loc.errorTitle,
+          loc.shareErrorMessage,
           backgroundColor: Colors.white
       );
     }

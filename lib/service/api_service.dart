@@ -4,8 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rowan_mind_lab/data/models.dart';
 import 'package:flutter/foundation.dart';
 
-
-
 class ApiService {
   static const String domain = "https://www.rowanzone.co.kr/mind";
   static const _testsCacheKey = "tests_json_cache_v1";
@@ -14,30 +12,37 @@ class ApiService {
   static Future<List<TestItem>> fetchTests({bool allowCache = true}) async {
     final prefs = await SharedPreferences.getInstance();
 
-    // 1) 캐시 먼저(있으면 즉시 보여주기)
+    // 1) 캐시 먼저 보여주기 (빠른 로딩을 위해 유지)
     if (allowCache) {
       final cached = prefs.getString(_testsCacheKey);
       if (cached != null && cached.isNotEmpty) {
         try {
           final list = (jsonDecode(cached) as List).cast<dynamic>();
-          // 캐시가 있어도 서버 최신을 시도할 거라서, 여기서 바로 return 하지 않고
-          // UX 취향에 따라: "캐시 즉시 return" vs "캐시 임시값 저장"
-          // -> 너는 시간절약/안정성 우선이니 "캐시 즉시 return" 추천
-          return list.map((e) => TestItem.fromJson(e)).toList();
-        } catch (_) {
-          // 캐시가 깨졌으면 무시하고 아래에서 서버 fetch
-        }
+          // 일단 캐시된 옛날 리스트를 반환하지만,
+          // 아래에서 서버 요청은 계속 진행됨 (UI 갱신은 나중에 될 수 있음)
+          // *주의*: 만약 앱이 'FutureBuilder' 하나만 쓰고 있다면,
+          // 여기서 return 해버리면 서버 데이터를 못 받아올 수도 있습니다.
+          // 확실하게 최신 데이터를 보려면 여기선 return 하지 않는 게 안전합니다.
+          // (사장님 앱 구조상 여기서 return 하면 서버 요청 안 함)
+
+          // 🔥 [수정] 여기서는 return 하지 않고 넘어갑니다!
+          // 그래야 아래 서버 요청 코드가 실행되어 최신 15개를 받아옵니다.
+        } catch (_) {}
       }
     }
 
-    // 2) 서버 fetch
-    final url = "$domain/tests.json";
+    // 2) 서버 fetch (🔥 캐시 방지 코드 추가됨)
+    // URL 뒤에 무작위 숫자(시간)를 붙여서 매번 새로운 파일인 척 요청함
+    final url = "$domain/tests.json?t=${DateTime.now().millisecondsSinceEpoch}";
+
     try {
       final res = await http
           .get(Uri.parse(url))
           .timeout(const Duration(seconds: 10));
+
       if (res.statusCode != 200 || res.bodyBytes.isEmpty) {
-        return [];
+        // 서버 실패 시 빈 리스트 반환 (혹은 아래 캐시 fallback으로 이동)
+        throw Exception("Server Error");
       }
 
       final body = utf8.decode(res.bodyBytes);
@@ -45,13 +50,14 @@ class ApiService {
 
       if (decoded is! List) return [];
 
-      // 캐시 저장(성공한 경우에만)
+      // 성공했으니 최신 데이터로 캐시 덮어쓰기
       await prefs.setString(_testsCacheKey, body);
       await prefs.setInt(_testsCacheAtKey, DateTime.now().millisecondsSinceEpoch);
 
       return decoded.map((e) => TestItem.fromJson(e)).toList();
+
     } catch (_) {
-      // 3) 서버 실패 시 캐시 fallback
+      // 3) 서버 실패 시에만 캐시된 옛날 데이터 사용 (Fallback)
       final cached = prefs.getString(_testsCacheKey);
       if (cached != null && cached.isNotEmpty) {
         try {
@@ -64,7 +70,8 @@ class ApiService {
   }
 
   static Future<List<DailyQuote>> fetchQuotes() async {
-    final url = "$domain/daily.json";
+    // 명언도 캐시 방지 (선택 사항)
+    final url = "$domain/daily.json?t=${DateTime.now().millisecondsSinceEpoch}";
     try {
       final res = await http
           .get(Uri.parse(url))
@@ -82,11 +89,12 @@ class ApiService {
     }
   }
 
+  // ... (나머지 sendToGenieChat, sendToGenieResult 함수는 그대로 두셔도 됩니다) ...
   static Future<String> sendToGenieChat(
       String question, {
         required String langCode,
       }) async {
-    final url = "$domain/ask-mirror"; // ✅ 기존 상담 엔드포인트
+    final url = "http://www.rowanzone.co.kr:3000/ask-mirror"; // ✅ 포트 3000 명시 (혹은 도메인에 맞게)
 
     try {
       final res = await http
@@ -118,10 +126,10 @@ class ApiService {
         required String title,
         required String desc,
       }) async {
-    final url = "$domain/ask-mirror-result"; // ✅ 결과 전용 엔드포인트
+    final url = "http://www.rowanzone.co.kr:3000/ask-mirror-result"; // ✅ 포트 3000 명시
 
     final payload = <String, dynamic>{
-      "question": question, // 짧게: "핵심만 현실적으로 조언해줘"
+      "question": question,
       "lang": langCode,
       "title": title.trim(),
       "desc": desc.trim(),
@@ -134,8 +142,7 @@ class ApiService {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(payload),
       )
-
-          .timeout(const Duration(seconds: 20)); // 결과는 살짝 더 여유
+          .timeout(const Duration(seconds: 20));
       debugPrint("✅ genie result status=${res.statusCode}");
 
       if (res.statusCode != 200) {
@@ -153,6 +160,4 @@ class ApiService {
       return "마력이 부족해... 인터넷 연결을 확인하거라.";
     }
   }
-
-
 }

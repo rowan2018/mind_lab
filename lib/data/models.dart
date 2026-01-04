@@ -40,6 +40,7 @@ class DailyQuote {
     return contentEn;
   }
 
+
   String get author {
     String lang = Get.deviceLocale?.languageCode ?? 'en';
     if (lang == 'ko') return authorKo;
@@ -182,7 +183,7 @@ class TestResult {
 // 5. 전체 테스트 아이템 모델 (다국어 업그레이드 완료)
 class TestItem {
   final String id;
-
+  final bool isPrimary;
   final String titleKo;
   final String titleEn;
   final String titleJp;
@@ -198,6 +199,7 @@ class TestItem {
 
   TestItem({
     required this.id,
+    this.isPrimary = false,
     required this.titleKo,
     required this.titleEn,
     required this.titleJp,
@@ -219,7 +221,7 @@ class TestItem {
 
     return TestItem(
       id: json['id'] ?? '',
-
+      isPrimary: json['isPrimary'] ?? false,
       titleKo: json['title_ko'] ?? json['title'] ?? '',
       titleEn: json['title_en'] ?? json['title'] ?? '',
       titleJp: json['title_jp'] ?? json['title'] ?? '',
